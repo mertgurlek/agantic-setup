@@ -1,7 +1,7 @@
 {
   "name": "agentic-repo-setup",
   "version": "0.31.0",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "private": true,
   "type": "module",
   "description": "Bir repoyu çok-ajanlı (vibe-coding) geliştirmeye hazırlayan Claude Code skill'i — kurulum süreci.",

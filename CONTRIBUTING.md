@@ -1,7 +1,7 @@
 # Katkı Rehberi
 
 Katkın için teşekkürler. Bu repo herkese açıktır: indirebilir, fork'layabilir, kendi
-projende kullanabilirsin (lisans: MIT). Ana repoya değişiklik ise yalnızca **pull request**
+projende kullanabilirsin (lisans: Apache 2.0). Ana repoya değişiklik ise yalnızca **pull request**
 ile girer.
 
 ## Akış
@@ -26,4 +26,4 @@ ile girer.
 
 ## Lisans
 
-Pull request göndererek katkının bu reponun lisansı (MIT) altında yayımlanmasını kabul etmiş olursun.
+Pull request göndererek katkının bu reponun lisansı (Apache 2.0) altında yayımlanmasını kabul etmiş olursun.

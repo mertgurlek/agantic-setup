@@ -48,7 +48,7 @@ docs/                   STATE / CONTEXT_BUDGET / FRICTION_LOG / SIDE-BUGS-LOG (�
 .gitattributes          dağıtım dışlamaları (export-ignore) — pakete GİRMEYENLERİN tek kaynağı
 public/                 PAYLAŞIMA HAZIR release bundle'ları (.skill + .zip); bundle'a kendisi girmez
 pilot-proje/ · pilot-sim/  [yalnız geliştirme reposunda — bu public sürümde YOK] pilot vaka çalışması
-LICENSE                 MIT
+LICENSE · NOTICE        Apache 2.0 lisans metni + telif bildirimi
 ```
 
 Pakete girenler için tek doğru kaynak `.gitattributes` (export-ignore); kapı envanteri için
@@ -93,8 +93,10 @@ Hâlâ genç: kurulumdan sonra ilk 5-10 dalganı ölç, değer üretmeyen parça
 
 ## Lisans
 
-MIT — telif **Mert Gürlek**, 2026. Serbestçe kullan, türet, dağıt; tek şart telif ve lisans
-metninin kopyalarda korunması (tam metin: `LICENSE`).
+Apache 2.0 — telif **Mert Gürlek**, 2026. Ticari kullanım dahil serbestçe kullan, türet, dağıt.
+Şartlar: lisans metni ve `NOTICE` kopyalarda korunur; değiştirdiğin dosyalarda değişikliği
+belirtirsin; yazarın adı ve proje adı, türev ürünü tanıtmak için izinsiz kullanılamaz. Lisans
+ayrıca katkıcılardan patent hakkı verir (tam metin: `LICENSE`).
 
 Katkı: herkes fork'layıp **pull request** açabilir; `main` korumalıdır, doğrudan push kapalıdır
 ve her PR sahibinin onayından ve CI'dan geçer. Ayrıntı: `CONTRIBUTING.md` · güvenlik açığı

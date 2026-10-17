@@ -7,4 +7,4 @@
 - [ ] `npm run check` yerelde yeşil (verify + testler)
 - [ ] Yeni kapı eklediysem: `CONTRACT.md` satırı + `tests/` altında en az bir kirli-girdi testi
 - [ ] Gizli bilgi, kişisel veri ya da müşteri/şirket adı içermiyor
-- [ ] Katkımın bu reponun lisansı (MIT) altında yayımlanmasını kabul ediyorum
+- [ ] Katkımın bu reponun lisansı (Apache 2.0) altında yayımlanmasını kabul ediyorum

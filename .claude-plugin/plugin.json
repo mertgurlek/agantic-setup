@@ -1,7 +1,7 @@
 {
   "name": "agentic-repo-setup",
   "description": "Bir repoyu çok-ajanlı (vibe-coding) AI geliştirmeye hazırlayan kurulum süreci: mini-denetim yapar, repoya ÖZGÜ rehber (CLAUDE.md) + makine kapıları + takip defterleri + roller üretir. Runtime motoru değil, kurulum sürecidir.",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "author": { "name": "mertgurlek" },
   "homepage": "https://github.com/mertgurlek/agantic-setup",
   "keywords": ["agentic", "multi-agent", "repo-setup", "guardrails", "ci", "vibe-coding"]
