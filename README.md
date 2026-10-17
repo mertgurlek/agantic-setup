@@ -3,7 +3,7 @@
 Bir repoyu **çok-ajanlı AI geliştirmeye** (vibe coding) hazırlayan Claude Code skill'i.
 Kimlik: **360° repo zekâsı** — kurar · kanıtlar (pilot + install-exam) · güncel tutar
 (`--doctor`) · yükseltir (`--upgrade`) · iyileştirir (FRICTION_LOG + bahçıvan turu). Ayrıntı:
-`SKILL.md` girişi. Sürüm geçmişi: kökteki en güncel `vX.Y-KARAR-DEFTERI.md` + `archive/` + `git log`.
+`SKILL.md` girişi. Sürüm geçmişi: kökteki en güncel `vX.Y-KARAR-DEFTERI.md` + `git log`.
 
 Bu bir şablon/starter-kit DEĞİLDİR: skill çağrıldığı repoda önce mini-denetim yapar (ölçer,
 varsaymaz), sonra o repoya ÖZGÜ rehber, kapı, takip ve rol katmanlarını üretir — ve kurduğu
@@ -15,6 +15,21 @@ birkaç yerde sana sorar (toggle/seviye, secret, baseline, silme) ve repoya-özg
 Sabit bir installer-scripti bunu yapamaz — repoya-özgü üretim muhakeme gerektirir.
 
 > **Güncel envanter (v0.31):** <!--fact:gate_count-->6<!--/fact--> kapı · <!--fact:test_count-->797<!--/fact--> birim testi · <!--fact:template_count-->30<!--/fact--> şablon. Kapı sözleşmesi: `gates_contract_version: 2`.
+
+## In English (short)
+
+A Claude Code skill that prepares any repository for multi-agent AI development. It first
+**measures** the repo (stack, tests, CI, existing docs), asks three sizing questions, then
+generates repo-specific layers: a `CLAUDE.md` rulebook, pre-commit + CI gates (secrets,
+doc-truth, placeholders, file size, append-only decision log), state/friction logs, and — for
+medium/large repos — separated planner / implementer / reviewer roles where the author can
+never approve its own work. Maintenance is human-triggered (`--doctor`, `--upgrade`); nothing
+runs in the background.
+
+Install: `/plugin marketplace add mertgurlek/agantic-setup` → `/plugin install
+agentic-repo-setup@mertgurlek-tools` → in your repo run `/agentic-repo-setup`. The skill's
+content is currently **Turkish**; Claude works with it in any language. Licensed Apache 2.0;
+contributions via pull request.
 
 ## Kurulum ve kullanım
 
@@ -34,7 +49,6 @@ INSTALL.md             kurulum yolları + dürüstlük sınırı
 CLAUDE.md               proje kuralları (kanonik kaynak — öncelik sırası CLAUDE.md:3-7)
 CONTRACT.md             kapıların kararlı CLI sözleşmesi + kapı kayıt tablosu + gates_contract_version
 vX.Y-KARAR-DEFTERI.md  [aktif sürüm] güncel karar defteri (append-only)
-archive/                önceki sürüm karar defterleri (append-only hafıza)
 verify.mjs · package.json  öz-doğrulama koşucusu + paket tanımı (script'ler: verify/test/check/health/facts/pack:skill/release/hook:install)
 gates/                  kapı script'leri — kanonik envanter ve sınıflar: `CONTRACT.md` "Kapı kayıt tablosu"
   lib/                  paylaşılan yardımcı modüller (kapı DEĞİL)
@@ -46,7 +60,6 @@ examples/               kapı/hook örnekleri (`acceptance.json` AC-3 KASITLI ne
 docs/                   STATE / CONTEXT_BUDGET / FRICTION_LOG / SIDE-BUGS-LOG (ölümlü + append-only takip dosyaları)
 .github/workflows/      CI: öz-doğrulama + kapı testleri (her push/PR)
 .gitattributes          dağıtım dışlamaları (export-ignore) — pakete GİRMEYENLERİN tek kaynağı
-public/                 PAYLAŞIMA HAZIR release bundle'ları (.skill + .zip); bundle'a kendisi girmez
 pilot-proje/ · pilot-sim/  [yalnız geliştirme reposunda — bu public sürümde YOK] pilot vaka çalışması
 LICENSE · NOTICE        Apache 2.0 lisans metni + telif bildirimi
 ```
@@ -67,7 +80,7 @@ Pakete girenler için tek doğru kaynak `.gitattributes` (export-ignore); kapı 
 ## Sürüm geçmişi
 
 Elle changelog tutulmaz. Sürüm sürüm gerekçe/kabul-red kararları: kökteki en güncel
-`vX.Y-KARAR-DEFTERI.md` + `archive/*-KARAR-DEFTERI.md`. Değişiklik ayrıntısı: `git log`.
+`vX.Y-KARAR-DEFTERI.md`. Değişiklik ayrıntısı: `git log`. Sürümlü paketler: GitHub Releases.
 
 ## v1.0 yol haritası
 

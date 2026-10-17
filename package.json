@@ -21,7 +21,6 @@
     "facts:check": "node scripts/facts.mjs --check",
     "state": "node scripts/state-sync.mjs",
     "state:check": "node scripts/state-sync.mjs --check",
-    "release": "node scripts/pack-skill.mjs && node scripts/install-local.mjs && node scripts/health-check.mjs --strict",
-    "install:local": "node scripts/install-local.mjs"
+    "release": "node scripts/pack-skill.mjs && node scripts/health-check.mjs"
   }
 }

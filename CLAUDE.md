@@ -35,7 +35,7 @@ eklersen ikisini de güncelle — biri eksikse sızıntı sessizdir.
 | `npm run health` | entropi taraması (bahçıvan ritüeli — uyarır, bloke ETMEZ); `health:fix` envanter/baseline sayılarını ölçümle yazar | 0,2 sn |
 | `npm run facts` | ölçümü koşup `facts.json`'a yazar (türetilebilir değer elle yazılmaz); `facts:check` yazmadan sapmayı raporlar | ~26 sn |
 | `npm run pack:skill` | `public/` release bundle üretir (temiz ağaç + verify + test yeşil ŞARTI) | — |
-| `npm run release` | **tek dokunuş: en güncel skilli üret + makineye kur + kanıtla** = pack:skill + install:local (~/.claude/skills, eski yedeklenir) + health-check `--strict` | — |
+| `npm run release` | release bundle üret + sağlık taraması (= pack:skill + health); bundle'lar GitHub Releases'a eklenir | — |
 | `npm run hook:install` | git pre-commit shim'ini `.git/hooks/`e kurar (idempotent) | — |
 
 **Baseline manifestosu (failure yeni mi eski mi ayrımı):** `verify.mjs` 11/11 temiz · `npm test`
@@ -101,7 +101,7 @@ eklersen ikisini de güncelle — biri eksikse sızıntı sessizdir.
 - **D-A sürüm boru hattı (ZORUNLU sıra — kaynak `reference/surum-ve-karar-disiplini.md`):**
   ① değiştir → ② SemVer'i ÜÇ yerde birden bump et (`package.json` ≡ `SKILL.md` başlığı ≡ `public/`
   bundle adı) → ③ karar defterine girdi → ④ commit → ⑤ **`npm run release`** (= pack:skill +
-  makineye kurulum + health `--strict`; kurulu skill kaynaktan eskiyse `kurulu-skill-bayat` release'i bloke eder; ④-⑤'i tek komutta kanıtlar). Repo bir kez kaynak 0.10.0-alpha iken bundle
+  health; bundle'lar GitHub Releases'a eklenir). Repo bir kez kaynak 0.10.0-alpha iken bundle
   v0.9.0'da dondu — bu boru hattı onun panzehiri. **Sürüm bump etmeden içerik eklersen** etiket aynı
   kalır ama bundle bayatlar → health-check `bundle-icerik-bayat` (etiket değil, HEAD-tazeliği) yakalar.
   `gates_contract_version` AYRI eksen: geriye-uyumlu opt-in kapı eklemek onu ARTIRMAZ.
