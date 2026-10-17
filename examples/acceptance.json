@@ -1,0 +1,25 @@
+{
+  "id": "FEAT-001",
+  "title": "Örnek özellik — kabul ölçütü (definition-of-done) şablonu",
+  "status": "in_dev",
+  "criteria": [
+    {
+      "id": "AC-1",
+      "desc": "Kullanıcı birincil eylemi tamamlayabilmeli.",
+      "passes": true,
+      "evidence": "tests/e2e/feature.spec.ts::primary-action"
+    },
+    {
+      "id": "AC-2",
+      "desc": "Sistem beklenen çıktıyı üretmeli.",
+      "passes": true,
+      "evidence": "tests/unit/feature.test.ts::produces-expected-output"
+    },
+    {
+      "id": "AC-3",
+      "desc": "Kenar durumda (boş/yetkisiz) davranış doğru olmalı.",
+      "passes": false,
+      "evidence": ""
+    }
+  ]
+}

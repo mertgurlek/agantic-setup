@@ -1,0 +1,50 @@
+node_modules/
+*.log
+*.zip
+.DS_Store
+
+# Sunum materyali — repo kimliğine ait değil (yerel anlatım/dosyalar)
+sunum*.html
+sunum*.pdf
+agentic-repo-sunum/
+
+# Eski sürüm kopyaları — yerel arşiv; kanonik sürüm git geçmişinde
+v0.4/
+v0.5/
+
+# Paketlenmiş skill build artefaktı — kaynak .claude/skills/presentation/ altında açık durur
+presentation.skill
+
+# Dağıtım çıktısı (npm run pack:skill) — build artefaktı, commit'lenmez; kaynak repoda açık durur
+dist/
+*.skill
+
+# Anchor-çıkarım harness çıktısı: pilot-sim/harness/01-extract-anchors.mjs HEDEF repoya `.agents/`
+# yazar; yanlışlıkla repo köküne karşı koşulursa burada boş/kalıntı dizin bırakır (health-check
+# `bos-dizin` uyarır). YALNIZ KÖK yok-sayılır (`/` öneki) — pilot-sim fixture'larındaki
+# `repos/*/.agents/anchors.json` KANIT setidir, izlenmeye devam eder.
+/.agents/
+
+# public/ = paylaşıma hazır release klasörü: skill/zip bundle'ları BURADA COMMIT'lenir (yukarıdaki
+# global *.skill/*.zip yok-saymasını public/ için geri açıyoruz). Bundle'a girmez (.gitattributes export-ignore).
+!public/*.skill
+!public/*.zip
+
+# Yerel eski sürüm arşivleri build çıktısıdır; yalnızca aktif release bundle'ı izlenir.
+public/*.skill
+public/*.zip
+!public/agentic-repo-setup-v0.17.0.skill
+!public/agentic-repo-setup-v0.17.0.zip
+.openrouter-usage.jsonl
+
+# Codex/HTML paketleyici doğrulama-hatası artıkları — geçici, karar taşımaz (v0.11)
+*.verification-failure.png
+*.tmp-*
+
+# beyin fırtınası koşu çıktıları (ham cevaplar — repo içeriği değil)
+runs/
+# rol-bench ham model çıktıları; vaka/panel tanımları (bench/*.json) İZLENİR, koşular değil.
+bench/runs/
+
+# Tur-içi kota sayacı (v0.23.0, K60) — runtime durumu, commit edilmez
+.claude/.quota-state.json

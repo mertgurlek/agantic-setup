@@ -1,0 +1,31 @@
+# CI (v0.8) — CodexQB'den ödünç: kapı olgunluğunu makineyle her push/PR'da kanıtla.
+# İki bacak: (1) öz-doğrulama (paket kendi kapılarından geçiyor mu), (2) kapı birim testleri.
+# v0.11 ÜÇÜNCÜ bacak: sağlık taraması (bahçıvan ritüeli) — BLOKE ETMEZ, ama KOŞAR.
+# Neden burada: hakem denetimi (2026-07-22) haklı bir açık buldu — "kimsenin koşmadığı ritüel"
+# de mekanizmasız kuraldır (doctrine: "mekanizması olmayan kural gürültüdür"). CI'a bağlanınca
+# ritüel her push'ta ATEŞLENİR ve bulgular görünür olur; bloke etmemesi bilinçli (neyin budanacağı
+# ÖZNEL karardır — "öznel tetiği makineye gömme"). Release öncesi manuel: `npm run health -- --strict`.
+name: verify
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Öz-doğrulama (paket kendi kapılarından geçiyor mu)
+        run: node verify.mjs
+      - name: Kapı birim testleri
+        run: npm test   # yalnız tests/ (SB-9) — package.json "test" betiği
+      - name: Sağlık taraması (bahçıvan ritüeli — uyarır, bloke ETMEZ)
+        run: node scripts/health-check.mjs

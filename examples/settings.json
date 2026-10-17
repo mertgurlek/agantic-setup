@@ -1,0 +1,62 @@
+{
+  "_comment": "ÖRNEK .claude/settings.json — döngü-içi (PreToolUse) + oturum-sonu (Stop) hook'ları. KURULUMDA KALİBRE ET: yollar kapıların KANONİK konumuna göre yazılır (bu pakette gates/; kurulum ajanı SKILL.md FAZ 2 madde 3'teki konum-seçme algoritmasıyla belirler — scripts/gates/ da olabilir). PreToolUse = ucuz/hızlı döngü-içi savunma (placeholder/secret/append-only); AĞIR Faz-2 kapıları (coverage-gate/registry-join/integrity/mode-escalation) buraya DEĞİL, git pre-commit + CI --strict halkalarına bağlanır (her Edit'te koşmak pahalı + diff-bağlamı gerektirirler). Bkz. ci-workflow.template.yml 'Strict Faz-2 kapıları' adımı. dosya-sahipligi satırları (PreToolUse + Stop + SubagentStop + SessionEnd, DÖRDÜ BİRLİKTE — biri eksikse kayıt alınmaz ya da bırakılmaz) yalnız [toggle: paralel-oturum] açıksa kurulur; sahiplik yalnız ajan ÇALIŞIRKEN tutulur (tur sonu bırakılır) → çakışmada varsayılan ENGEL (exit 2); --uyari yalnız bilgi verir ve yazımı ÖNLEMEZ.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/gates/check-hygiene.mjs\" --rule=placeholders"
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/gates/check-hygiene.mjs\" --rule=secrets"
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/gates/check-history.mjs\" --rule=append-only"
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/gates/check-process-discipline.mjs\" --rule=dosya-sahipligi"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/gates/check-process-discipline.mjs\" --rule=dosya-sahipligi"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/gates/check-process-discipline.mjs\" --rule=dosya-sahipligi"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/gates/check-doc-integrity.mjs\" --rule=doc-truth"
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/gates/check-process-discipline.mjs\" --rule=dosya-sahipligi"
+          }
+        ]
+      }
+    ]
+  }
+}

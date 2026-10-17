@@ -1,0 +1,11 @@
+{
+  "name": "mertgurlek-tools",
+  "owner": { "name": "mertgurlek" },
+  "plugins": [
+    {
+      "name": "agentic-repo-setup",
+      "source": "./",
+      "description": "Bir repoyu çok-ajanlı AI geliştirmeye hazırlayan kurulum süreci (kapılar + repoya-özgü rehber + takip defterleri + roller)."
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "_comment": "Bu paketin KENDİ döngü-içi hook'ları (dogfood — examples/settings.json'dan kalibre edildi). Kapıların kanonik konumu bu repoda kök gates/ (SKILL.md FAZ 2 madde 3: mevcut hook/CI zaten oraya bağlı → otorite o). PreToolUse = ucuz/hızlı döngü-içi savunma, exit 2 → Edit/Write REDDEDİLİR ve gerekçe Claude'a geri beslenir. AĞIR kapılar (verify + node --test) buraya DEĞİL, git pre-commit + CI'a bağlıdır — her Edit'te koşarsa hook bypass edilir.",
+  "_append_only_note": "check-history --rule=append-only ortam değişkeni APPEND_ONLY_EXTRA ile karar defterlerini korur. Hook girdisi 'env' alanını DESTEKLEMEZ (Claude Code hook sözleşmesi) → değişken komut satırına GÖMÜLÜ yazılır. Bu liste scripts/self-pre-commit.mjs'teki KARAR_DEFTERLERI ile AYNI tutulur; yeni defter eklerken İKİSİNİ birden güncelle (iki ev = drift riski, bilinçli kabul: hook JSON'ı script import edemez).",
+  "_kota_note": "delege-kotasi (v0.23.0, K60) AYRI matcher'da: Read|Grep|Glob. Bu kapı hook stdin'ini OKUYAN İLK kapıdır — şema ÖLÇÜLDÜ (geçici prob, 2026-08-27): prompt_id = tur kimliği (sayaç sıfırlaması), tool_name = çağrılan araç. Sayaç .claude/.quota-state.json'da (gitignored), prompt_id değişince sıfırlanır. UYARI modunda bağlı (exit 0): eşik 15 gerçek turn'ler üzerinden kalibre edildi (%7,9 tetiklenme) ama hedef repolarda kalibrasyon farklı olabilir — --strict (exit 2 = araç REDDEDİLİR) bilinçli AÇILMADI.",
+  "_stop_note": "Stop hook'una health-check BAĞLANMADI. Gerekçe: Stop'ta non-zero çıkış turu BİTİRMEZ, konuşmayı sürdürür; health-check ise tasarımı gereği UYARIR (bahçıvan ritüeli, kapı değil) → bağlansaydı uyarı varken ajan duramazdı (sonsuz döngü). Ritüel CI'da ve elle koşar: npm run health.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read|Grep|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/gates/check-process-discipline.mjs\" --rule=delege-kotasi"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/gates/check-process-discipline.mjs\" --rule=dosya-sahipligi"
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/gates/check-hygiene.mjs\" --rule=placeholders"
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/gates/check-hygiene.mjs\" --rule=secrets"
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/gates/check-hygiene.mjs\" --rule=surface-residue"
+          },
+          {
+            "type": "command",
+            "command": "APPEND_ONLY_EXTRA=\"v0.31-KARAR-DEFTERI.md\" node \"$CLAUDE_PROJECT_DIR/gates/check-history.mjs\" --rule=append-only"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/gates/check-process-discipline.mjs\" --rule=dosya-sahipligi"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/gates/check-process-discipline.mjs\" --rule=dosya-sahipligi"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/gates/check-process-discipline.mjs\" --rule=dosya-sahipligi"
+          }
+        ]
+      }
+    ]
+  },
+  "_sahiplik_note": "dosya-sahipligi (v0.31.0, K87) DÖRT olaya bağlı: PreToolUse(Edit|Write|MultiEdit) sahipliği ALIR; Stop (tur sonu) ana ajanınkini, SubagentStop alt ajanınkini, SessionEnd oturumunkini BIRAKIR — biri eksikse kayıt ya alınmaz ya bırakılmaz. Sahiplik ömrü = ÇALIŞMA ANI → çakışmada varsayılan ENGEL (exit 2; uyarı modu mesajı yazımdan SONRA ulaştırıyordu, ölçüldü 2026-10-07). Stop'ta kapı HER ZAMAN exit 0 döner (non-zero turu sürdürür — _stop_note). Kayıt <git-common-dir>/ajan-sahiplik/ (commit dışı)."
+}

@@ -1,0 +1,27 @@
+{
+  "name": "agentic-repo-setup",
+  "version": "0.31.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "description": "Bir repoyu çok-ajanlı (vibe-coding) geliştirmeye hazırlayan Claude Code skill'i — kurulum süreci.",
+  "scripts": {
+    "verify": "node verify.mjs",
+    "install-exam": "node verify.mjs --install-exam",
+    "doctor": "node verify.mjs --doctor",
+    "upgrade": "node verify.mjs --upgrade",
+    "test": "node --test tests/*.test.mjs",
+    "check": "node verify.mjs && node --test tests/*.test.mjs",
+    "hook:install": "node scripts/install-hook.mjs",
+    "pre-commit": "node scripts/self-pre-commit.mjs",
+    "pack:skill": "node scripts/pack-skill.mjs",
+    "health": "node scripts/health-check.mjs",
+    "health:fix": "node scripts/health-check.mjs --fix",
+    "facts": "node scripts/facts.mjs",
+    "facts:check": "node scripts/facts.mjs --check",
+    "state": "node scripts/state-sync.mjs",
+    "state:check": "node scripts/state-sync.mjs --check",
+    "release": "node scripts/pack-skill.mjs && node scripts/install-local.mjs && node scripts/health-check.mjs --strict",
+    "install:local": "node scripts/install-local.mjs"
+  }
+}

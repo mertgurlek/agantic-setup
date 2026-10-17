@@ -1,0 +1,60 @@
+{
+  "_sozlesme": [
+    "FACTS ŞABLONU (v0.26) — 'türetilebilir değer elle yazılmaz' ilkesinin hedef-repo artefaktı.",
+    "",
+    "NEDEN VAR [ÖLÇÜLDÜ 2026-09-06, 7 repoluk saha denetimi]: kapılar DOĞRU değer üretiyor ama o",
+    "değer elle yazılmış özet tablolara GERİ YAZILMIYOR. Ölçülen vakalar:",
+    "  · pilot-backend: 'baseline 1240 test' -> gerçek koşu 1488 (%20 sapma), 11 DOSYAYA yayılmış",
+    "  · aynı repo, tek bir STATE.md içinde L0 makale sayısı 118/131/140 — ÜÇ farklı değer, hepsi",
+    "    aynı commit'te, hepsi 'taze' (zaman-tabanlı tazelik mekanizması bunu GÖREMEZ)",
+    "  · pilot-mobile: CLAUDE.md 'MobX 2.3.0' diyor, MobX projede HİÇ YOK (yüzlerce commit dokunulmamış)",
+    "  · saha-H: bir analiz deseni %13 -> 0 düştü çünkü veri şeması değişti ve sistem bunu",
+    "    SESSİZ SIFIR sandı -> bu yüzden 'unknown' statüsü ZORUNLUDUR, 0 ile karıştırılamaz",
+    "",
+    "İKİ SINIF — karıştırılırsa katman çöker:",
+    "  measurements = ÖLÇÜM. Koddan/koşudan TÜRETİLİR. MAKİNE yazar, insan elle DÜZENLEMEZ.",
+    "  policy       = POLİTİKA. İnsan KARARI (tavan, bütçe, eşik). Ölçülemez. İnsan yazar.",
+    "  Ayrımın testi: 'SKILL.md 300 satır TAVANI' politikadır; 'SKILL.md ŞU AN 300 satır' ölçümdür.",
+    "",
+    "KURULUM KADEMESİ (tek beden herkese UYMAZ — 0-doküman repo ile 194k-satır repo aynı şeyi almaz):",
+    "  K0 ENVANTER  — doküman yok/az (ör. yüzlerce dosyalık bir backend repo, 0 md). Yalnız manifest'ten",
+    "                 türetilebilenler: bağımlılık, sürüm, test komutu, dosya sayısı. Kurulum",
+    "                 maliyeti ~0, kazancı büyük: ajan artık boşluğu ÖNSELİNDEN doldurmaz.",
+    "  K1 İŞARETLE  — dokümanı olan repo. K0 + mevcut md'lerdeki ölçüm sayıları fact-işaretlenir.",
+    "  K2 BAĞLA     — olgun repo (kendi kapıları/scriptleri var). K1 + mevcut kapı çıktıları",
+    "                 measurements'a beslenir (yeni ölçüm YAZILMAZ, var olanın çıktısı bağlanır).",
+    "",
+    "DOKÜMANDA KULLANIM: sayıyı işaretle, kapı taze tutsun —",
+    "  Toplam <!--fact:test_count-->0<!--/fact--> test yeşil.",
+    "Kapı: node gates/check-doc-integrity.mjs --rule=facts-drift [--strict]",
+    "  varsayılan UYARI · --strict FAIL · facts.json yoksa ya da işaret yoksa NO-OP.",
+    "SINIR: kapı yalnız İŞARETLİ hücreyi görür. Çıplak sayı görüş alanı DIŞINDADIR — işaretlemek",
+    "insan/kurulum işidir. Bu kapı 'işaretleneni taze tutar', 'her sayıyı bulur' DEĞİL.",
+    "",
+    "Bu '_sozlesme' alanı YALNIZ şablonda vardır — gerçek facts.json'da SİLİNİR."
+  ],
+
+  "generated_by": "<ölçüm script'i, ör. scripts/facts.mjs veya npm run facts>",
+
+  "measurements": {
+    "test_count": {
+      "status": "unknown",
+      "cmd": "<ör. dotnet test | grep -c '^  Passed' · npm test · pytest -q>",
+      "measured_at": "<YYYY-AA-GG>",
+      "_not": "status: measured|unknown. ÖLÇÜLEMEDİYSE 0 YAZMA — unknown bırak (saha-H dersi)."
+    },
+    "_ornek_measured": {
+      "status": "measured",
+      "value": 1488,
+      "cmd": "dotnet test src/Tests/UnitTests",
+      "source_hash": "<opsiyonel: ölçümün dayandığı kaynağın sha1'i — kaynak değişince kaydın bayatladığı böyle ANLAŞILIR (snapshot körlüğü panzehiri)>",
+      "measured_at": "2026-09-06"
+    }
+  },
+
+  "policy": {
+    "_not": "İNSAN yazar. Ölçüm script'i buraya ASLA yazmaz. Tavan/bütçe/eşik değerleri.",
+    "guide_file_line_cap": 300,
+    "root_rules_line_cap": 150
+  }
+}

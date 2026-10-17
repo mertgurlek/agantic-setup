@@ -1,0 +1,99 @@
+# ==============================================================================
+# TEST-BRIEF ŞABLONU — [T] teknik doküman → test-case köprüsünün ARA-ARTEFAKTI
+#
+# NE İŞE YARAR: Bir iş (bug fix / yeni feature) bitince, [T] teknik dokümanı + registry'den
+# test ekibinin fibery-test-case-writer'ının 7-alan+Step şemasına OTOMATİK bir taslak üretilir.
+# Bu YAML o köprünün çıktısıdır — repoda yaşar, insan/reviewer onaylar, SONRA Fibery'ye gider.
+#
+# 🔴 NEDEN FIBERY'YE DOĞRUDAN YAZILMAZ (4 dış-model oybirliği 2026-07-21: Codex/GPT-5.6/GLM-5.2/Kimi):
+#   Köprünün doğrudan Fibery'ye yazması = halüsinasyon test-case ANINDA canlıya düşer. Ara-artefakt
+#   + insan onayı, "yanlış tamlık" riskini (en büyük risk) backlog'da yakalar. Fibery push AYRI bir
+#   CI job'u (outbox), onay sonrası, idempotent.
+#
+# 🔴 FAIL-CLOSED (4/4): Kaynağı ([T] anchor'ı) olmayan HİÇBİR alan doldurulmaz. Bilinmeyen alan
+#   `UNKNOWN` / `TBD` işaretlenir ve `status: needs_review` yayını BLOKE eder. Uydurma = zarar.
+#
+# ÜRETİM: Bu FORMAT'tır. [toggle: test-köprüsü] açıksa (Fibery/test-case entegrasyonu + [T] katmanı
+#   varsa) kurulur; yoksa HİÇ kurulmaz (kullanmayan ödemez).
+# ==============================================================================
+
+brief_version: 1
+generated_at: {{TARIH}}                # köprü ne zaman üretti (bayatlama tarihi)
+source_commit: {{SHA}}                 # hangi commit'teki [T]'den üretildi (provenance)
+
+# --- KAYNAK [T] (traceability — her brief bir [T]'ye demirlenir) --------------
+source:
+  feature_id: {{FEATURE_ID}}           # registry anahtarı (KANONİK) — [T].feature_ids ile eşleşir
+  tech_doc: {{T_YOL}}                  # örn. docs/tech/policy/warning-levels.md
+  t_verification: {{dogrulandi|dogrulanamadi}}  # [T].verification.status — dogrulandi DEĞİLSE brief taslak kalır, YAYINLANMAZ
+  t_anchors: []                        # [T].anchors (repo:symbol) — hangi koda dayanıyor
+  risk_sinifi: {{para|veri|guvenlik|normal}}  # [T].risk_sinifi — edge kapsamını ZORUNLU artırır
+
+# --- 🔴 SEMANTİK-DRIFT KONTROLÜ (GLM-5.2 bulgusu) ----------------------------
+# ⚠️ KÖK RİSK: [T] kodla senkron (anchor'lı) olsa bile YANLIŞ belgelenmiş olabilir. Örnek:
+#    kod 400 döner, [T] "404" yazar (kapıları geçer çünkü dosya değişince ik\isi de dokunuldu).
+#    Köprü 404 testi yazar → QA 400 görünce YANLIŞLIKLA bug açar. Kod doğru, [T] yanlıştı.
+# ÇÖZÜM: köprü, [T].expected'ı unit-test assertion'larıyla ÇAPRAZ denetler (varsa). Uyuşmazsa
+#    o Expected Result `confidence: low` + `NEEDS_REVIEW` alır — sessizce test-case'e geçmez.
+assertion_crosscheck:
+  unit_test_anchors: []                # [T].test_anchors — assertion kaynağı
+  status: {{matched|mismatch|no_unit_test}}  # mismatch → ilgili Expected'lar needs_review
+  # no_unit_test (test-yok repo) → Fibery Test Scenario TEK oracle; confidence düşer, review zorunlu
+
+# --- FIBERY 7-ALAN (fibery-test-case-writer girdisi) -------------------------
+# ⚠️ Module + Client fibery'de SCHEMA-REQUIRED. registry'den çözülemezse UNKNOWN → yayın bloke.
+fibery_fields:
+  module: {{MODULE|UNKNOWN}}           # tests/<module>/ ile birebir; registry Client↔surface join'inden
+  client: {{CLIENT|UNKNOWN}}           # ürün yüzeyi — [L0].applies.panel ↔ registry surface eşlemesi (JOIN anahtarı)
+  feature: {{FEATURE|UNKNOWN}}
+  flow: {{FLOW|UNKNOWN}}
+  priority: {{P1|P2|P3}}               # negative/edge default P2
+  tags: []                             # smoke/regression/sanity
+  test_type: {{UI|API}}                # default UI
+
+# --- PRECONDITIONS + STEPS (test doluluğunun gövdesi) ------------------------
+preconditions: []                      # başlangıç durumu/veri/rol — [T].flags + eligibility'den
+steps: []
+  # Her step — mekanik türetim + kaynak:
+  # - order: 1
+  #   name: "<veri-bağımsız tetikleyici aksiyon>"    # ← [T].akış adımı
+  #   expected_results: ["<somut/doğrulanabilir çıktı>"]  # ← [T].hata-durum sözlüğü
+  #   derived_from: "<[T]-anchor>"                    # 🔴 ZORUNLU — kaynaksız step üretilmez
+  #   confidence: {high|low}                          # low → needs_review
+
+# --- 🔴 EDGE-CASE 3 EKSEN (zorunlu template, içerik mekanik+hakem) -----------
+# 4/4 model: 3 eksen TEMPLATE olarak zorunlu; her vaka bir contract-anchor'a dayanmalı,
+# dayanağı olmayan üretilmez. risk_sinifi para/veri/güvenlik → edge kapsamı ARTAR.
+edge_cases:
+  sifir_veri: []      # boş/null/bulunamayan — MEKANİK ([T] required alanların boşluğu)
+  yetkisiz: []        # 401/403/rol-reddi — MEKANİK if risk_sinifi=güvenlik, aksi HAKEM (dolaylı yollar)
+  akis_kesintisi: []  # timeout/500/retry/duplicate — MEKANİK ([T] hata-sözlüğü)
+  # her vaka: {name, expected, derived_from: <anchor>, confidence}
+
+# --- REGRESYON (registry ters-indeksinden) -----------------------------------
+regression:
+  affected_features: []                # registry ters-indeks: bu feature hangi başka feature'lara bağlı
+  v1_v2_pairs: []                      # nesil eşli-vakaları (aynı test V1+V2 context'inde) — HAKEM seçer
+  note: ""                             # ters-indeks gürültülü olabilir (Kimi) → alakasız olanı ele
+
+# --- 🔴 AÇIK UÇLAR (fail-closed — bunlar doluyken YAYINLANMAZ) ----------------
+unresolved:
+  unknown_fields: []                   # registry'den çözülemeyen 7-alan → yayın bloke
+  needs_review: []                     # confidence:low / assertion mismatch / hakem-gerekli edge
+  # Boş DEĞİLSE → status: needs_review, Fibery push BLOKE (insan çözmeli)
+
+# --- STATÜ + ÜRETİM METRİĞİ (Kimi: köprü işe yarıyor mu ölçülsün) -------------
+status: {{draft|needs_review|approved}}   # approved SADECE insan onayı + unresolved boş ise
+overall_confidence: {{high|medium|low}}
+metrics:
+  cases_generated: 0
+  cases_needs_review: 0                # yüksekse köprü zayıf / [T] eksik sinyali
+
+# ------------------------------------------------------------------------------
+# DOLDURMA KURALLARI:
+# 1. Bu brief ELLE değil, köprü tarafından üretilir (reference/faz2-dokuman-katmani.md §köprü).
+# 2. Kaynaksız alan UYDURMA → UNKNOWN/TBD + unresolved'a ekle (fail-closed).
+# 3. status: approved SADECE (a) unresolved boş + (b) insan/reviewer onayı sonrası.
+# 4. Onaylı brief → outbox → fibery-test-case-writer (idempotent, SHA+anchor+feature_id damgalı).
+# 5. Fibery push AYRI CI job; başarısız olursa brief KAYBOLMAZ (outbox retry — Codex/GPT).
+# ------------------------------------------------------------------------------

@@ -1,0 +1,67 @@
+{
+  "_comment": [
+    "ÜRETİM TALİMATI (v0.11 — kurulum künyesi): Kurulum ajanı bu dosyayı hedef reponun KÖKÜNE",
+    "'.agentic-repo-setup.json' adıyla yazar. AMACI: 'bu repo hangi skill sürümüyle, neyle kuruldu'",
+    "sorusunu makine-okunur cevaplamak — yükseltmenin (scripts/upgrade.mjs) ÖN KOŞULU budur.",
+    "Bu dosya olmadan yükseltme KÖRDÜR: hangi kapı generic kopya, hangi dosya repoya-özgü bilinemez.",
+    "KURAL: yalnız ÖLÇÜLEN doldurulur; bilinmeyen alan tahmin edilmez (uydurma künye = yalan söyleyen rehber).",
+    "TOGGLE ÜÇ DURUMLU (v0.30): true = evet · false = SORULDU, hayır dendi · null = SORULMADI.",
+    "'Sorulmadı' ≠ 'hayır': kurulum ajanı ADIM 0 sorusunu sormadan false YAZAMAZ. null kalan toggle",
+    "install-exam'de FAIL (kurulum sorusu sorulmadı), doctor'da UYARI. Sonradan açmak: node verify.mjs --upgrade --toggle=<ad>=true.",
+    "Bu _comment alanı üretilen dosyada SİLİNİR."
+  ],
+
+  "skill": "agentic-repo-setup",
+  "skill_version": "{{SKILL_SURUMU}}",
+  "gates_contract_version": "{{GATES_CONTRACT_VERSION}}",
+  "installed_at": "{{KURULUM_TARIHI}}",
+  "last_upgraded_at": null,
+
+  "install_mode": "{{KURULUM_MODU}}",
+  "size_tier": "{{BOYUT}}",
+
+  "toggles": {
+    "muhatap": {
+      "pm_urun": null,
+      "qa_senaryo": null,
+      "son_kullanici_dokumani": null,
+      "test_koprusu": null
+    },
+    "takip": {
+      "state": null,
+      "yan_bug": null
+    },
+    "dis_entegrasyon": {
+      "ci_platformu": "{{CI_PLATFORMU}}",
+      "is_takip": false,
+      "ast_indeks": false
+    }
+  },
+
+  "_generic_comment": [
+    "GENERIC = skill'den BİREBİR kopyalanan dosyalar → yükseltmede güvenle tazelenebilir.",
+    "Kurulum ajanı buraya YALNIZ gerçekten kopyaladığı dosyaları yazar.",
+    "v0.14 MÜHÜR: girdi ya düz yol (kimliksiz) ya {path, sha256, sealed_at, skill_version} objesidir.",
+    "sha256'yı AJAN YAZMAZ — FAZ 5'te makine mühürler: node verify.mjs --doctor --seal --target=.",
+    "Sonradan mutabakat: node verify.mjs --doctor (eksik/drift tespiti; drift ≠ yaşayan doküman).",
+    "repo_owned_files ASLA hash'lenmez — yaşayan dokümandır, hash'lemek yanlış-alarm fabrikasıdır.",
+    "v0.15 YÜKSELTME: node verify.mjs --upgrade (dry-run) → --apply. YALNIZ mühürlü + drift'siz",
+    "girdiler tazelenir; elle değiştirilmiş/mühürsüz/silinmiş olanlar ATLANIR (hiçbir bayrak ezmez)."
+  ],
+  "generic_files": {
+    "gates": [],
+    "runner": [],
+    "ci": []
+  },
+
+  "_owned_comment": [
+    "REPO-ÖZGÜ = bu repodaki ÖLÇÜMLERDEN üretilmiş dosyalar → yükseltme bunlara ASLA DOKUNMAZ.",
+    "Üstüne yazmak ALTIN KURAL ihlalidir (içerik kopyalanmaz, üretilir).",
+    "Yükseltme en fazla 'şablon değişti, gözden geçir' UYARISI verir.",
+    "v0.15 DÜRÜSTLÜK NOTU: bu uyarı HENÜZ ÜRETİLMİYOR — künye girdileri hangi şablondan",
+    "üretildiğini taşımıyor (ölçülebilir sinyal yok). Şema genişletmesi pilota ertelendi (K24)."
+  ],
+  "repo_owned_files": [],
+
+  "notes": "{{KURULUM_NOTU}}"
+}

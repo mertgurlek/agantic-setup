@@ -1,0 +1,72 @@
+# Bu şablon SKILL kurulum tarifinde KURULMAZ — hedef repoda [L0] dokümanlarını üreten/onaylayan
+# kişi tarafından, birden fazla makalede TEKRAR EDEN bir global değer görülünce ELLE açılır
+# (v0.18.3 karar). Kurulum anında zorla üretmek ölü-tekrar sinyali olmadan uydurulmuş bir dosya
+# demektir — "içerik kopyalanmaz, üretilir" altın kuralına aykırı düşerdi.
+# ============================================================================
+# SITE-CONFIG ŞABLONU (Katman A — genel, repo-özgü değil)
+#
+# ÜRETİM TALİMATI: Bu FORMAT'tır, içerik değil. [toggle: son-kullanıcı doküman] muhatap
+# toggle'ı açıksa VE [L0] dokümanlarında birden fazla makalede TEKRAR EDEN bir global değer
+# (destek e-postası, yardım merkezi URL'i gibi) varsa bu dosya kurulur. Toggle kapalıysa
+# veya global tekrar yoksa bu dosya KURULMAZ (kullanmayan ödemez).
+#
+# NEDEN AYRI DOSYA (bilinen bulgu — kaynağı bir değerlendirmede yakalanan drift sınıfı):
+# "destek kanalı 3 farklı makalede geçiyor, adres HİÇBİRİNDE aynı yerde değil" —
+# klasik YANLIŞ KATMAN HATASI: destek e-postası gibi bir değer bir FEATURE'a AİT DEĞİL,
+# tüm sistemin ortak bilgisidir. Feature başına ([T].constants içine) yazılırsa N makalede
+# N KOPYA olur → adres değişince N yerde güncelleme gerekir → drift GARANTİSİ.
+#
+# AYRIM (iki sözlük, iki amaç — birbirine karıştırma):
+#   [T].constants     → FEATURE'A ÖZGÜ sabit (örn. "sıfırlama linki 24 saat geçerli")
+#                        anchor'lı, tek feature'a ait, o feature'ın [T]'sinde yaşar.
+#   site-config (bu)  → GLOBAL sabit (örn. destek e-postası) — feature'dan BAĞIMSIZ,
+#                        TEK YERDE yaşar, [L0] gövdesinde makro olarak çağrılır.
+#
+# KULLANIM: [L0] gövdesinde `{{support.email}}` gibi bir makro yazılır; render-anında
+# (varsa IR derleyicisi/site üreteci) bu dosyadaki gerçek değerle DEĞİŞTİRİLİR. Böylece
+# adres değişince TEK satır güncellenir, N makale otomatik doğru olur.
+#
+# KONUM: kontrol düzleminde (docs repo), tek dosya: `control-plane/site-config.yaml`
+# (ya da hedef repo yerleşimine göre eşdeğer merkezi konum — kurulumda ölçülerek seçilir).
+#
+# ⚠️ ANCHOR'SIZ GLOBAL SABİT DE UYDURULMAZ — bu değerler kodda/ortam değişkeninde/CRM'de
+# GERÇEKTEN var olan değerlerdir. Kurulumda ÖLÇMEDEN buraya değer yazma; alanı BOŞ bırak
+# ve `{{ÖLÇÜLMEDİ}}` etiketiyle işaretle.
+#
+# GENİŞLETME KURALI: yeni bir makro ihtiyacı doğunca (bir [L0] makalesinde ikinci kez aynı
+# global değere referans verilecekse) buraya EKLE — var olan anahtarı silme/yeniden adlandırma
+# (referans veren makaleler kırılır). `check-hygiene --rule=placeholders` (kuruluysa) bu dosyayı `.template.yaml`
+# olduğu için TARAMAZ; hedef repoda üretilen GERÇEK `site-config.yaml` dosyasını tarar.
+# ============================================================================
+
+# --- support: destek/yardım kanalı bilgisi ----------------------------------
+# [L0] gövdesinde kullanım: {{support.email}}, {{support.help_center}}, {{support.hours}}
+support:
+  email: {{DESTEK_EPOSTA}}                # örn. destek@ornek.com — kurulumda ölçülerek doldurulur
+  help_center: {{YARDIM_MERKEZI_URL}}     # örn. https://yardim.ornek.com
+  hours: {{DESTEK_SAATLERI}}              # örn. "Hafta içi 09:00-18:00" — yoksa "7/24" ya da SİL
+  phone: {{DESTEK_TELEFONU}}              # opsiyonel — yoksa bu satırı SİL (boş placeholder bırakma)
+
+# --- product: ürün/marka adlandırması ---------------------------------------
+# Çok-markalı/white-label sistemlerde marka adı feature dokümanlarına GÖMÜLÜRSE
+# rebrand'de N makale değişir. Buraya tek yerden bağlanır.
+# [L0] gövdesinde kullanım: {{product.name}}, {{product.legal_name}}
+product:
+  name: {{URUN_ADI}}                      # kullanıcıya görünen kısa ad
+  legal_name: {{TICARI_UNVAN}}            # opsiyonel — sözleşme/fatura metninde geçiyorsa
+
+# --- policy_links: sık referans verilen politika/sözleşme sayfaları --------
+# [L0] gövdesinde kullanım: {{policy_links.privacy}}, {{policy_links.terms}}
+# Kapalı liste değil — hedef repoda tekrar eden her link buraya bir anahtar olarak eklenir.
+policy_links:
+  privacy: {{GIZLILIK_POLITIKASI_URL}}
+  terms: {{KULLANIM_SARTLARI_URL}}
+
+# --- GENİŞLETME NOKTASI: yukarıdaki üç blok başlangıç kümesidir -------------
+# Hedef repoda FAZ 1 denetiminde ("üç kez tekrar eden global değer" kuralı — bkz.
+# templates/context-budget.template.md "kart kabul kurali" ile aynı eşik mantığı)
+# yeni bir tekrar eden global değer bulunursa buraya yeni bir üst-anahtar EKLENİR.
+# Örnek adaylar (hedef repoya göre ölçülerek eklenir/silinir, burada VARSAYILAN DEĞİL):
+#   billing: {invoice_email: ..., portal_url: ...}
+#   status_page: {url: ...}
+#   social: {twitter: ..., linkedin: ...}

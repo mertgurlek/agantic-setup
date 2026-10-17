@@ -1,0 +1,62 @@
+# GOLDEN FIXTURE — geçerli (temiz) test-brief örneği.
+# `check-provenance --rule=brief-provenance` bu dosyada exit 0 (temiz) vermeli — köprünün DOĞRU çıktısı nasıl görünür.
+# (Karşıt vakalar — eksik derived_from, approved+unresolved, mismatch — tests/check-provenance.test.mjs, brief-provenance bölümü; bu dosyanın temiz kaldığını da orada bir test zorlar.)
+# Örnek konu: bir "sipariş limiti aşım uyarısı" işi (policy feature). Değerler örnektir.
+brief_version: 1
+generated_at: "2026-07-21"
+source_commit: "a1b2c3d4e5"
+source:
+  feature_id: siparis-limiti
+  tech_doc: docs/tech/policy/warning-levels.md
+  t_verification: dogrulandi
+  t_anchors:
+    - ornek-web:PolicyWarningLevels
+  risk_sinifi: para
+assertion_crosscheck:
+  unit_test_anchors:
+    - ornek-web:PolicyWarningLevelsTest
+  status: matched
+fibery_fields:
+  module: Order Limit
+  client: ornek.io
+  feature: Policy Warning
+  flow: Limit Warning
+  priority: P2
+  tags: [regression]
+  test_type: UI
+preconditions:
+  - "Admin rolüyle giriş yapılmış olmalı"
+  - "En az bir aktif sipariş limiti tanımlı olmalı"
+steps:
+  - order: 1
+    name: "Stok limitini aşan miktarda bir sipariş girilir"
+    expected_results:
+      - "Kullanıcıya uyarı seviyesine uygun bildirim gösterilir"
+    derived_from: "ornek-web:PolicyWarningLevels"
+    confidence: high
+edge_cases:
+  sifir_veri:
+    - name: "Tutar alanı boş bırakılarak kaydedilmeye çalışılır"
+      expected: "Zorunlu alan hatası gösterilir, uyarı tetiklenmez"
+      derived_from: "ornek-web:PolicyWarningLevels"
+      confidence: high
+  yetkisiz: []
+  akis_kesintisi:
+    - name: "Uyarı gösterilirken ağ kesintisi olur"
+      expected: "İşlem geri alınır, kullanıcıya tekrar-dene seçeneği sunulur"
+      derived_from: "ornek-web:PolicyWarningLevels"
+      confidence: low
+regression:
+  affected_features:
+    - siparis-girme
+  v1_v2_pairs: []
+  note: "V1/V2 motor eşli-vakası hakem seçimine bırakıldı"
+unresolved:
+  unknown_fields: []
+  needs_review:
+    - "akis_kesintisi/ağ-kesintisi vakası confidence:low — QA doğrulamalı"
+status: needs_review
+overall_confidence: medium
+metrics:
+  cases_generated: 3
+  cases_needs_review: 1

@@ -1,0 +1,118 @@
+# Bu şablon SKILL kurulum tarifinde KURULMAZ — hedef repoda chatbot/RAG eval harness'ini
+# çalıştıran ekip tarafından elle kullanılır (v0.18.3 karar). `templates/test-brief.template.yaml`
+# (kod→test-case köprüsü, `[toggle: test-köprüsü]` ile SKILL.md FAZ 4/reference/faz2-dokuman-
+# katmani.md §8'de kurulur) ile KARIŞTIRILMASIN — o dış test/QA sistemine (Fibery/Jira) giden
+# AYRI bir akıştır; bu dosya [L0]/chatbot cevap-kalitesini sınar, kod tarafında hiçbir kapı/
+# toggle onu tüketmez (satır 6-7'de zaten "runtime bu kurulum tarafından İÇERİLMİYOR" diyordu).
+#
+# ÜRETİM TALİMATI: Bu, chatbot/RAG eval SET ŞABLONUDUR — [L0] son-kullanıcı dokümanlarının
+# gerçekten doğru cevap ürettiğini (retrieval + abstain + doğruluk) sınayan test senaryosu formatı.
+# Kurulum ajanı bunu KOPYALAMAZ: her vaka HEDEF REPONUN gerçek [L0]/[T] setinden, kurulum
+# sırasında veya Faz-2 eval turunda ÜRETİLİR (ALTIN KURAL ① — içerik kopyalanmaz üretilir).
+# Yer: docs/eval/<konu>.eval.yaml (bir dosya = ilgili bir [L0] öbeği; büyürse bölünebilir).
+# Kim çalıştırır: eval harness (Faz-2 tasarımı — henüz kurulum bu runtime'ı İÇERMİYOR, yalnız
+#   VAKA FORMATINI verir). `check-hygiene --rule=placeholders` bu dosyaları TARAMAZ (.template.yaml, kod değil).
+#
+# DÖRT VAKA SINIFI — HER BİRİ FARKLI BİR HALÜSİNASYON SINIFINI SINAR (önceki pilot kaydı
+# pilot-proje/PILOT-BULGULARI.md §6.6 — git geçmişinde; gerçek eval koşusundan — 7 soru, 2 FAIL, sistematik boşluklar [T] şemasına geri izlendi):
+#
+#   golden       → doğru soru, doğru [L0] var, bot DOĞRU ve TAM cevap vermeli.
+#                  SINADIĞI: temel retrieval + üretim çalışıyor mu.
+#   adversarial  → soru [L0]'ın KAPSAMI DIŞINDA (negative_queries'te olmalı) — bot cevap
+#                  VERMEMELİ, "bilmiyorum" + related_features.when'e yönlendirmeli.
+#                  SINADIĞI: yanlış-chunk halüsinasyonu (PİLOT FAIL 1: "parolam doğru ama
+#                  giremiyorum" → retrieval yanlış makaleye çekti, aliases konu-komşuydu).
+#   no-answer    → [T]'nin DOĞRULAMADIĞI bir yokluk/varlık sorusu (feature_exists: bilinmiyor
+#                  olmalı) — bot KESİNLİK ÜRETMEMELİ, ne "var" ne "yok" demeli.
+#                  SINADIĞI: yokluk-halüsinasyonu (PİLOT FAIL 2: "Google hesabına şifre
+#                  eklenebilir mi?" → [T] doğrulamamıştı, üreteç çıkarımla YANLIŞ KESİNLİK üretti).
+#   esli-vaka    → AYNI SORU, İKİ FARKLI FİRMA/NESİL KONTEKSTİNDE — cevaplar birbirinden
+#                  FARKLI olmalı (V1/V2 motor farkı, firma_flags farkı, surface nesli farkı).
+#                  SINADIĞI: applicability körlüğü — bot tüm firmalara TEK cevap dayatıyor mu?
+#                  (çok-sürümlü ürünlere özgü; genel skill'de FORMAT
+#                  olarak kalır, "eşli" olma zorunluluğu yalnız çok-sürümlü repoda anlamlı.)
+#
+# KABUL KURALI (E0, deterministik ölçülebilir kısım):
+#   golden       → answer.abstain: false VE answer.cited_feature_id == expected.feature_id
+#   adversarial  → answer.abstain: true  VE answer.escalated == true (intake'e yükseltildi)
+#   no-answer    → answer.abstain: true  VE answer.text bir KESİNLİK iddiası İÇERMEMELİ
+#                  (⚠️ "içermemeli" bulanık/E2 — deterministik yalnız abstain bayrağını denetler;
+#                  metin-içi kesinlik taraması Hakem/insan işidir, bu şablon onu ZORUNLU KILMAZ)
+#   esli-vaka    → iki case'in answer.text'i FARKLI olmalı (E2 — insan/Hakem karşılaştırır;
+#                  otomatik string-eşitliği YETERSİZ, çünkü "farklı ama ikisi de yanlış" da
+#                  farklıdır — bu şablon yalnız VAKA ÇİFTİNİ üretir, hükmü vermez)
+
+# ============================================================================
+# GOLDEN — doğru soru, [L0] tam kapsıyor, bot doğru cevap vermeli
+# ============================================================================
+- case_id: <konu-golden-001>
+  type: golden
+  query: <"kullanıcının gerçekten sorduğu soru-formu — search_queries'ten al">
+  expected:
+    feature_id: <registry-feature-id>
+    abstain: false
+    must_mention: []                # örn. [süre: "24 saat"] — constants'tan, KESİNLİK iddiaları anchor'lı olmalı
+  source_l0: <docs/user/feature-id.md>   # bu vakayı besleyen [L0] — doc-truth ile aynı yol-varlık mantığı
+  notes: <neden bu soru seçildi — hangi search_queries/aliases girdisinden geldi>
+
+# ============================================================================
+# ADVERSARIAL — [L0] kapsamı dışı soru, bot ABSTAIN etmeli (uydurmamalı)
+# ============================================================================
+- case_id: <konu-adversarial-001>
+  type: adversarial
+  query: <"kapsam-dışı ama YAKIN görünen soru — negative_queries'ten al">
+  expected:
+    abstain: true
+    escalated: true                 # intake'e/insana yükseltilmeli, sessizce cevaplanmamalı
+    related_feature_hint: <fallback-feature-id|null>   # related_features.when'den
+  source_l0: <docs/user/feature-id.md>
+  # ⚠️ PİLOT DERSİ: "giriş yapamıyorum" gibi KONU-KOMŞU ama CEVAP-FARKLI sorular en sık FAIL
+  # üretir (retrieval yanlış chunk'ı çeker). Bu tipte vaka seçerken retrieval.aliases'a
+  # KONULMAMIŞ ama search_queries ile SÖZCÜK ÖRTÜŞMESİ yüksek sorguları önceliklendir.
+  notes: <bu soru hangi negative_queries girdisinden geldi, neden yakın-ama-farklı>
+
+# ============================================================================
+# NO-ANSWER — [T] bunu DOĞRULAMAMIŞ (feature_exists: bilinmiyor) — bot kesinlik üretmemeli
+# ============================================================================
+- case_id: <konu-no-answer-001>
+  type: no-answer
+  query: <"var mı / yapılabilir mi türünde bir soru — [T].verified_absences boşken sorulan yokluk sorusu">
+  expected:
+    abstain: true
+    no_certainty: true              # ne "evet yapabilirsiniz" ne "hayır yapamazsınız" — E2 ile denetlenir
+  source_l0: <docs/user/feature-id.md>
+  # ⚠️ Bu vaka YALNIZ feature_exists: bilinmiyor VEYA verified_absences boşken anlamlıdır.
+  # feature_exists: var|yok ise bu artık golden/adversarial'dır — no-answer OTOMATİK GEÇERSİZ olur.
+  notes: <hangi [T]'nin verified_absences'ı bu soruyu kapsamıyor>
+
+# ============================================================================
+# EŞLİ-VAKA — aynı soru, İKİ farklı firma/nesil bağlamında FARKLI cevap almalı
+# (V1/V2 motor farkı, firma_flags farkı, surface nesli farkı — applicability körlüğü sınavı)
+# ============================================================================
+- case_id: <konu-esli-001-a>
+  type: esli-vaka
+  pair_id: <konu-esli-001>          # A/B aynı pair_id taşır — harness bunları EŞLEŞTİRİR
+  query: <"aynı soru — iki bağlamda da sorulacak">
+  context:
+    engine_version: [V1]            # örn. [V1] | [V2] — applies.engine_version'dan
+    firma_flags: {}                 # örn. {IsGuestCheckoutDisabled: true}
+  expected:
+    feature_id: <registry-feature-id>
+    abstain: false
+  source_l0: <docs/user/feature-id.md>
+  notes: <bu bağlamda [T].behavior hangi dalı üretiyor (gen2/gen3)>
+
+- case_id: <konu-esli-001-b>
+  type: esli-vaka
+  pair_id: <konu-esli-001>          # aynı çift
+  query: <"AYNI soru metni — context farklı">
+  context:
+    engine_version: [V2]
+    firma_flags: {}
+  expected:
+    feature_id: <registry-feature-id>
+    abstain: false
+  source_l0: <docs/user/feature-id.md>
+  notes: <A'dan FARKLI olması gereken davranış — [T].behavior.gen3'ten>
+  # ⚠️ Harness A/B'yi pair_id ile eşleştirip cevapların GERÇEKTEN farklı olduğunu doğrular.
+  # Aynı cevap dönerse → ya applicability körlüğü var, ya bu aslında eşli-vaka DEĞİL (tek golden yeter).

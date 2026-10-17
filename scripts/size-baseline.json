@@ -1,0 +1,29 @@
+{
+  "_YORUM": [
+    "SIZE-BASELINE — check-hygiene --rule=file-size muafiyet listesi (CIRCIR / ratchet).",
+    "KURAL: muaf dosya KUCULTULEBILIR ama BUYUYEMEZ. Buyurse kapi FAIL verir.",
+    "",
+    "NEDEN VAR (v0.25, olculdu 2026-08-28): kok CLAUDE.md 'SKILL.md tavani ~300 satir' diyordu",
+    "ama check-hygiene GUIDE_FILE deseninde SKILL YOKTU -> kural MEKANIKSIZDI. Dogfood yasasinin",
+    "('mekanizmasi olmayan kural gurultudur') bu repodaki kendi ihlaliydi: SKILL.md 499 satir,",
+    "tavanin %166'si, ve hicbir kapi bakmiyordu.",
+    "",
+    "SKILL desene eklendi; mevcut boyut TAVAN olarak donduruldu ki BUYUME DURSUN. Asil kucultme",
+    "(M5: FAZ 2 + FAZ 3 agir detayinin reference/e inmesi) ayri bir istir — her adimda buradaki",
+    "sayi ASAGI cekilir. Circir tek yone doner.",
+    "",
+    "pilot-proje/... girdisi ALAN 2 (pilot angajman) artefaktidir, generic skill degil;",
+    "generic paket kurallarina tabi olmasi gerekmez ama git-tracked oldugu icin kapi gorur.",
+    "",
+    "v0.25 M5 SONRASI: SKILL.md 499 -> 300 (FAZ2 kapi katalogu, FAZ3 bilgi katmani,",
+    "ADIM0 toggle eksenleri, FAZ5 muhur+sinav reference/e tasindi) -> MUAFIYETI KALKTI.",
+    "Circir amacina ulasti: dosya kucultuldu, satir listeden SILINDI.",
+    "",
+    "v0.30 (2026-10-03): file-size elle argümansız koşuda artık çalışma ağacını da tarıyor (B2, halka-duyarlı kapsam).",
+    "Bu, iki ESKİ test dosyasının (v0.29 HEAD: 1231 ve 1488 satır) 1000 tavanını aştığını ilk kez görünür kıldı.",
+    "Bölme ayrı iş; o güne kadar cırcıra alındı (büyüyemez)."
+  ],
+  "pilot-proje/devir-paketi/test-ekibi-skill/SKILL.md": 365,
+  "tests/check-doc-integrity.test.mjs": 1234,
+  "tests/check-provenance.test.mjs": 1568
+}

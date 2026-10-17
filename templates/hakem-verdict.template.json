@@ -1,0 +1,61 @@
+{
+  "_YORUM": [
+    "HAKEM-VERDICT ŞABLONU — 'check-process-discipline.mjs --rule=hakem-verdict'in ARADIĞI artefakt.",
+    "NEDEN VAR: roles.template.md hakem.md rolünü NESİRDE tarif eder ('hakem geçmeden iş",
+    "kapanmaz') ama nesir zorlamaz — uygulayıcı hakemi hiç çağırmadan 'onaylandı' diyebilirdi.",
+    "Bu dosya o çağrının MEKANİK KANITIDIR: kod diff'i varken bu dosya (dal adına göre) yoksa",
+    "'check-process-discipline.mjs --rule=hakem-verdict --strict' modda commit/CI'ı bloke eder.",
+    "",
+    "KONUM: .hakem/<dal-adi>.verdict.json  VEYA  docs/verdicts/<dal-adi>.verdict.json",
+    "  (kurulumda ikisinden biri seçilir; --dir=<konum> ile de zorlanabilir)",
+    "Dosya adı <dal-adi>.verdict.json OLMALI (ya da içindeki 'dal' alanı dal adıyla eşleşmeli) —",
+    "kapı bu ikisinden biriyle 'bu verdict bu commit'e ait mi' sorusunu cevaplar.",
+    "",
+    "🔴 KARAR DİSİPLİNDE KALIR: 'verdict' alanı 'red' olsa BİLE kapı BLOKLAMAZ, yalnız RAPORLAR.",
+    "Red kararına ne yapılacağı (iş geri mi döner, insan mı karar verir) İNSAN işidir — bu bilinçli",
+    "bir tercih: kapı yalnız 'hakem GERÇEKTEN çağrıldı mı' sorusunu mekanik sorar (E0); 'çağrıldıktan",
+    "sonra ne çıktı, ne yapılmalı' YARGI sorusu insanda/hakemde kalır (E2). Bu ayrım bilinçli — bkz.",
+    "'check-provenance.mjs --rule=registry-join'in aynı ilkesi (yapısal bütünlük E0, granülerlik/kalite yargısı E2).",
+    "",
+    "🔴 dis_model (v0.12, ZORUNLU): hakem.md madde 10 (dış-model adversarial denetimi) koşuldu mu?",
+    "GERÇEK PİLOT BULGUSU: bu adım iki kez gerekti, iki kez atlandı, HİÇ İZ KALMADI — rehber",
+    "'bu adım yapılıyor' izlenimi veriyordu. Kapı dış-modeli KOŞMAYA zorlamaz (her iş için gerekmez;",
+    "hafif modda kullanılmaz bile) — yalnız SORUNUN CEVAPLANMASINI zorlar. Yani: atlamak SERBEST,",
+    "sessiz atlamak DEĞİL. 'atlandi' derken gerekce ZORUNLU; 'kosuldu' derken model atfı ZORUNLU.",
+    "",
+    "🔴 dayanak (v0.24, OPSİYONEL — geriye uyumlu): verdict'in dayandığı KAYNAK ÇAPASI",
+    "(repo:symbol, dosya:satır ya da komut çıktısı). NEDEN: doktrin TB-5/TB-6/TB-7 üç ayrı",
+    "'bitti ama kanıtsız' sınıfı tanımlar (yokluk körlüğü · türetilmiş katman · tek seviye) ve",
+    "hakem bunları NESİRDEN uygular; alan onu makine-okunur kılar. Kaynak deseni: bir çıkarımı",
+    "kaynaktaki yerine bağlayamıyorsan onu SESSİZCE KABUL ETME, İŞARETLE.",
+    "SÖZLEŞME (geriye uyumlu): alan HİÇ YOKSA kapı sessizdir — eski verdict'ler kırılmaz.",
+    "VARSA: 'dayanak_durumu' ZORUNLU ve 'cozuldu' | 'COZULMEDI' olmalı. 'COZULMEDI' bir HATA",
+    "DEĞİL, DÜRÜST BİR BEYANDIR — ama sessiz geçmez: kapı --strict'te bloke eder, insan karar verir.",
+    "🔴 SINIR: kapı çapanın GERÇEKTEN çözülüp çözülmediğini DENETLEMEZ (yalnız beyanın DOLU ve",
+    "geçerli olduğunu). Çözünürlük denetimi ölçüm arkasına alındı — REPLAY ölçümü aynı sınıftan",
+    "aday imzaların 19/19 YANLIŞ-ALARM verdiğini gösterdi; kalibre edilmeden kodlanmaz."
+  ],
+
+  "gorev": "<{{GOREV_KISA_ADI}} — ör: 'sifre-sifirlama akışı, TECH-AUTH-001'>",
+  "uygulayan": "<{{KOD_YAZAN}} — ajan adı veya insan; uygulayıcı kim>",
+  "dogrulayan": "<{{DOGRULAYAN}} — hakem/ajan adı veya insan; uygulayan İLE ASLA AYNI OLAMAZ>",
+  "verdict": "<onay | red | kosullu>",
+  "gerekce": "<{{GEREKCE}} — kanıtlı, madde madde; roles.template.md hakem.md ADIM 1-10'a göre>",
+  "timestamp": "<{{ISO_8601_TARIH}} — ör: 2026-07-15T14:30:00+03:00>",
+
+  "dayanak": "<OPSİYONEL: verdict'in dayandığı kaynak çapası — repo:symbol, dosya:satır ya da komut çıktısı>",
+  "dayanak_durumu": "<dayanak VARSA ZORUNLU: cozuldu | COZULMEDI — COZULMEDI dürüst bir beyandır, sessiz geçmez>",
+
+  "dis_model": {
+    "durum": "<kosuldu | atlandi — ZORUNLU; 'atlandi' meşru bir cevaptır, SESSİZLİK değil>",
+    "model": "<durum=kosuldu ise ZORUNLU: hangi model/komut (ör. 'z-ai/glm-5.2' | 'codex-run.mjs')>",
+    "gerekce": "<durum=atlandi ise ZORUNLU: neden atlandı (ör. 'hafif mod, tek dosya, davranış değişmedi')>"
+  },
+
+  "_OPSIYONEL_ALANLAR": {
+    "dal": "<git dal adı — dosya adından çözülemiyorsa (ör. detached HEAD) BU ALAN ZORUNLU>",
+    "diff_ref": "<commit sha / PR numarası — hangi diff'e karşı verdict verildiği>",
+    "kosul_takibi": "<verdict='kosullu' ise: koşul neydi, nasıl kapatılacak>",
+    "dis_model_bulgulari": "<durum=kosuldu ise: dış modelin bulduğu maddeler (kabul/red gerekçesiyle)>"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "_sozlesme": "ÖLÇÜM makine yazar (measurements), POLİTİKA insan yazar (policy). Elle düzenleme: yalnız policy.",
+  "generated_by": "scripts/facts.mjs",
+  "measurements": {
+    "gate_count": {
+      "status": "measured",
+      "value": 6,
+      "cmd": "ls gates/check-*.mjs | wc -l",
+      "measured_at": "2026-10-17"
+    },
+    "template_count": {
+      "status": "measured",
+      "value": 30,
+      "cmd": "ls templates/ | wc -l",
+      "measured_at": "2026-10-17"
+    },
+    "test_count": {
+      "status": "measured",
+      "value": 797,
+      "cmd": "node --test tests/*.test.mjs",
+      "source_hash": "86bb248f653e9ae633200b4485ba84e95c50fdb2",
+      "measured_at": "2026-10-17"
+    },
+    "skill_md_lines": {
+      "status": "measured",
+      "value": 299,
+      "cmd": "wc -l SKILL.md",
+      "measured_at": "2026-10-17"
+    },
+    "claude_md_lines": {
+      "status": "measured",
+      "value": 141,
+      "cmd": "wc -l CLAUDE.md",
+      "measured_at": "2026-10-17"
+    }
+  },
+  "policy": {
+    "skill_md_line_cap": 300,
+    "claude_md_line_cap": 150,
+    "role_file_line_cap": 40
+  }
+}

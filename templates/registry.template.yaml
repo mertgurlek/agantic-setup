@@ -1,0 +1,70 @@
+# ==============================================================================
+# REGISTRY ŞABLONU — feature_id ↔ [T] teknik-doküman JOIN'i (kimlik haritası)
+#
+# NEDEN VAR (pilot bulgusu — agentic-repo-setup'in önceki pilotu; kayıt git geçmişinde, pilot-proje/PILOT-BULGULARI.md §6.5): [T]'ler feature_id
+# ile GRUPLANMIYORDU — registry hiç yoktu (ya da kuruldu ama boştu). Sonuç: iki [T] aynı
+# görevin iki yüzüyken AYRI feature_id taşıdı, gruplama çöktü, [L0] üreteci "bu makale
+# hangi [T]'lerden beslenir?" sorusunu CEVAPLAYAMADI.
+#
+# ⭐ KURAL (templates/T-teknik-dokuman.template.md ile AYNI):
+#   KOD kimliği   = anchor (repo:symbol)  ← CI türetir, DETERMİNİSTİK
+#   GÖREV kimliği = feature_id            ← İNSAN kararı, KULLANICININ DİLİYLE
+#   REGISTRY      = ikisi arasındaki JOIN ← gruplamanın SAHİBİ (KANONİK liste burada yaşar)
+#
+# YAŞAM DÖNGÜSÜ: seed-kasif ÖNERİR → seed-hakem/insan çürütür → İNSAN mint eder.
+# Yeni bir [T] doğduğunda "hangi feature'a hizmet ediyor?" sorusu burada cevaplanır —
+# yoksa yeni kayıt öner-onayla akışıyla eklenir. Elle çift-yazım yapma: [L0]'ın
+# `anchors.tech_docs` alanı BURADAN türetilir, [T]'nin `feature_ids` alanı BURAYA
+# karşı doğrulanır (gates/check-provenance.mjs --rule=registry-join, çift yönlü).
+#
+# BU DOSYA NEYİ DENETLETMEZ: feature_id'in granülerliği/isimlendirmesi (ör. "giris-ekrani"
+# kod-şekilli mi, "sifre-sifirlama" görev-şekilli mi) BURADA yargılanmaz — o E2'dir (Hakem
+# işi). `check-provenance --rule=registry-join` YALNIZ yapısal bütünlüğü (yetim/ölü-yol/tutarsızlık) denetler.
+# ==============================================================================
+
+features:
+  # Her anahtar bir feature_id'dir — GÖREV ŞEKLİNDE yaz (kod terimi DEĞİL):
+  #   ✅ sifre-sifirlama · siparis-limiti   (kullanıcının arayacağı kelimeler)
+  #   ❌ giris-ekrani · LoginCommandHandler     (kod yapısı)
+  # TEST: "Kullanıcı bunu arar mı?" (L0 şablonunun retrieval.search_queries ekseniyle aynı).
+  sifre-sifirlama:
+    # --- 🔴 ROSETTA: feature_id'nin KODDAKİ karşılıkları (P17 çözümü — tip uyuşmazlığı) ---
+    # ⚠️ BİLİNEN RİSK SINIFI: aynı feature çoğu kod tabanında ÜÇ biçimde yaşar — slug (bu anahtar,
+    #    kullanıcı dili), enum-adı (kod), numerik kod (backend). Chatbot'un `enabled_features`
+    #    filtresi (Ş7/Ş8) hangi biçimin geldiğini bilmeden çalışamaz → çeviri tablosu ZORUNLU.
+    #    Kanonik mint otoritesi genelde NUMERİK koddur (backend'den gelir, spoof edilmez); slug ALIAS.
+    # OPSİYONEL: kod tabanında feature'lar tek biçimde (yalnız slug) yaşıyorsa bu bloğu SİL.
+    # ELLE mutabakatla doldurulur (manifest-otomasyonundan bağımsız — insan kararı; plan §7 P17).
+    rosetta:                          # hedef repoda ölçülerek doldurulur — uydurma
+      enum_name: <KodEnumAdi>         # örn. PasswordReset — koddaki enum üyesi (varsa)
+      code: <numerik|null>            # örn. 12 — backend'in kanonik sayısal kimliği (varsa; yoksa null)
+    # tech_docs: bu feature'ı besleyen [T] dosyalarının GÖRELİ yolları (repo köküne göre).
+    # BOŞ BIRAKMA: boş liste = bu feature hiçbir [T]'ye çözülmemiş demektir (kapı bunu
+    # "çözünürlük oranı" ölçümünde eksik sayar). Henüz [T] yazılmadıysa satırı YORUM SATIRI
+    # yap ya da açıkça `tech_docs: []  # (T) henüz yazılmadı` diye NOT düş — sessiz boşluk bırakma.
+    tech_docs:
+      - docs/tech/auth/sifre-sifirlama.md
+      - docs/tech/auth/login-ekrani.md
+
+  # İkinci örnek — bir [T] birden çok feature'a hizmet edebilir (aynı dosya yolu birden
+  # çok anahtarın tech_docs listesinde tekrar edebilir; bu meşrudur, drift DEĞİLDİR).
+  giris-yapma:
+    rosetta:
+      enum_name: <KodEnumAdi>
+      code: <numerik|null>
+    tech_docs:
+      - docs/tech/auth/login-ekrani.md
+
+# ------------------------------------------------------------------------------
+# DOLDURMA KURALLARI:
+# 1. Bu şablonu KOPYALAYIP `docs/registry.yaml`'a (ya da repo-özgü eşdeğer konuma) taşı.
+# 2. `features:` altına GERÇEK feature_id'leri ekle — [T] dosyalarının frontmatter'ındaki
+#    `feature_ids:` alanıyla İSİM BİREBİR AYNI olmalı (kapı string eşleşmesi yapar).
+# 3. Her feature_id'nin tech_docs'u BOŞ KALMASIN — kapı yetim feature'ları UYARI olarak listeler.
+# 4. Yeni bir [T] yazıldığında: önce burada onu barındıracak feature_id var mı bak; yoksa
+#    yeni anahtar ekle (insan onayı ile — seed-kasif/seed-hakem rolleri Faz 2'de bunu otomatikleştirir).
+# 5. 🔴 ROSETTA (P17): kod tabanında feature'lar birden çok biçimde (slug/enum/numerik) yaşıyorsa
+#    her feature_id'ye `rosetta` bloğu ekle — chatbot'un `enabled_features` filtresi buna bağlı.
+#    KANONİK mint otoritesi numerik `code`'dur (varsa); slug alias. Tek-biçimli repoda `rosetta` SİL.
+#    IR-manifest bu tabloyu tüketir (chatbot'a giden `feature_id` çevirisi orada çözülür).
+# ------------------------------------------------------------------------------

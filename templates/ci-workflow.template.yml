@@ -1,0 +1,95 @@
+# ÜRETİM TALİMATI (v0.9 — DEAK CI adaptörü): Bu, GitHub Actions üreteç ŞABLONUDUR.
+# Kurulum ajanı {{...}} alanlarını ADIM 0 + FAZ 1'de ÖLÇÜLEN stack komutlarıyla doldurur ve
+# hedef reponun .github/workflows/ altına repo-özgü bir dosya olarak yazar.
+# İLKE: Şablon FORMAT verir; her komut BU repoda KOŞULARAK doğrulanmış olmalı (altın kural ①).
+# PLATFORM: Bu üreteç YALNIZ GitHub Actions içindir. Repo Azure DevOps/GitLab kullanıyorsa bu
+#   şablonu KULLANMA — verify reçetesini (aynı komut listesi) o platformun sözdizimine ELLE dök
+#   ve STATE'e "platform-üreteci tasarım, elle kuruldu" yaz (reference/external-integrations.md §1.3).
+# YERLEŞTİRME: {{VERIFY_KOMUTU}} = FAZ 2'de kurulan stack-tespitli verify (npm/dotnet/flutter/...).
+#   Tek manifest → tek run satırı; çok-manifest/mikroservis → her birine ayrı run satırı.
+# MATRIX: yalnız gerçekten birden çok sürüm/runtime test ediliyorsa bırak; tek runtime ise SİL.
+# SECRET: bu dosyaya gerçek anahtar YAZMA — `${{ secrets.AD }}` referansı kullan (`check-hygiene --rule=secrets` korur).
+name: verify
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: {{RUNNER}}                  # örn. ubuntu-latest / windows-latest
+    # MATRIX (opsiyonel — tek runtime ise tüm strategy bloğunu SİL):
+    strategy:
+      fail-fast: false
+      matrix:
+        {{MATRIX_EKSENI}}: {{MATRIX_DEGERLERI}}   # örn. node: [20, 22]  /  dotnet: ['8.0.x']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0               # append-only --all taban karşılaştırması tam geçmiş ister (sığ klonda kapı ATLANDI der)
+      # STACK KURULUMU (manifest'e göre BİRİNİ bırak, ötekini SİL):
+      - uses: {{SETUP_ACTION}}           # actions/setup-node@v4 / actions/setup-dotnet@v4 / ...
+        with:
+          {{SETUP_PARAMI}}: ${{ matrix.{{MATRIX_EKSENI}} }}   # node-version / dotnet-version / ...
+      # BAĞIMLILIK (gerekiyorsa):
+      - name: Bağımlılıklar
+        run: {{KURULUM_KOMUTU}}          # npm ci / dotnet restore / flutter pub get / pip install -r ...
+      # DOĞRULAMA — stack-tespitli verify reçetesi (FAZ 2'de ölçülen komut[lar]):
+      - name: Doğrulama (verify reçetesi)
+        run: {{VERIFY_KOMUTU}}           # npm run verify / dotnet test / flutter test / terraform validate
+      # KAPILAR — repoda Node olmasa da kurulur (D-34: Node aracın bağımlılığıdır). Runner'da `node`
+      # yoksa bu adımdan ÖNCE bir Node kurulum adımı ekle (ör. actions/setup-node).
+      - name: Kapılar (doc-truth + kapı testleri)
+        run: {{KAPI_KOMUTU}}             # hedefte kurulu kapılar, ör. node gates/check-hygiene.mjs
+
+      # 🔴 STRICT KAPILAR — "İDDİA ETME, ZORLA" (dış denetim 2026-07-15).
+      # NEDEN AYRI ADIM: doc-recency ve co-update VARSAYILAN olarak UYARI'dır (exit 0) — yerel
+      # commit'i yavaşlatmasın diye (yanlış-pozitif toleransı). Ama [T]'nin "asla bayatlamaz" ve
+      # "UI değişti → doküman güncellendi" GARANTİLERİ tam da bu kapılara dayanır. Garanti yalnız
+      # --strict CI'da GERÇEKTİR — yerelde uyarı, CI'da OTORİTE. Bu adım SİLİNİRSE iddia YALAN olur.
+      # ⚠️ Bu adımı SİLMEK = "dokümanlar güncel kalır" iddiasından VAZGEÇMEK. Bilinçli değilse SİLME.
+      - name: Strict doküman kapıları (garanti bunlara bağlı)
+        run: |
+          node gates/check-doc-integrity.mjs --rule=doc-recency --strict {{CASCADE_BAYRAGI}}   # toggles.muhatap.son_kullanici_dokumani=true → `--cascade`; kapalıysa alanı BOŞ yaz
+          node gates/check-history.mjs --rule=co-update --strict
+
+      # TAM TARAMA KAPILARI (v0.30.4): CI'da staging YOKTUR → argümansız/`staged` çağrı 0 dosya tarayıp sessizce OK döner.
+      # `--all` ile file-size TÜM izlenen dosyaları (git ls-files), append-only ise `<taban>...HEAD` aralığını denetler.
+      # ⚠️ append-only taban karşılaştırması checkout'taki `fetch-depth: 0`'a dayanır (yukarıda); kaldırılırsa sığ klonda
+      # taban çözülemez → kapı "ATLANDI" der (denetlemedi!). Taban adı farklıysa
+      # env `APPEND_ONLY_TABAN=origin/<dal>` ver (açıkça verilip çözülemezse kapı FAIL olur).
+      - name: Tam tarama kapıları (file-size + append-only, --all)
+        run: |
+          node gates/check-hygiene.mjs --rule=file-size --all
+          node gates/check-history.mjs --rule=append-only --all
+
+      # 🔴 STRICT FAZ-2 KAPILARI — ORPHAN PANZEHİRİ (dış denetim 2026-07-21).
+      # NEDEN İSİMLİ (placeholder DEĞİL): bu 4 alt-kuralın kodu mükemmel çalışır ama HİÇBİR olaya
+      # otomatik bağlı DEĞİLLERSE "kurulu ≠ çalışıyor" olurlar (skill'in kendi teşhis ettiği ORPHAN
+      # riski). Eskiden isimsiz bir placeholder'daydılar → kurulum ajanı unutabilirdi.
+      # Artık isimli. Her biri İLGİLİ ARTEFAKT YOKKEN no-op'tur (kullanmayan ödemez) — ama VARSA
+      # koşmaları ZORUNLU; aksi halde halüsinasyon-önleme / self-report zorlaması çalışmaz.
+      # KOŞUL: registry/[T]/[L0] kurulmadıysa (Faz-2 doküman toggle'ı KAPALI) bu adımı SİL.
+      - name: Strict Faz-2 kapıları (registry/[T] varsa — ORPHAN bırakma)
+        run: |
+          node gates/check-provenance.mjs --rule=coverage-gate --strict          # para/veri [T] okuma ile dogrulandi alamaz
+          node gates/check-provenance.mjs --rule=registry-join --strict          # yetim feature · ölü tech_doc yolu
+          node gates/check-doc-integrity.mjs --rule=integrity                    # dangling anchor · stub-revert · id çakışması
+          node gates/check-process-discipline.mjs --rule=mode-escalation --strict # ağır sinyal + hafif mod beyanı → tam dalga
+        # ⚠️ Faz-2 doküman katmanı YOKSA (registry/[T]/[L0] kurulmadı): tüm bu adımı SİL — no-op değil, gereksiz.
+
+      # 🟡 OPSİYONEL — TASARIM KADEME 2-3 (v0.16, dış araştırma 2026-07-28). Bu paket kendisi
+      # tarayıcı ÇALIŞTIRMAZ (kimlik: kurulum süreci, runtime motoru DEĞİL) — bu adım yalnız
+      # REÇETEdir, hedef repo doldurur/çalıştırır. Kademe 1 (`check-self-registry --rule=design-tokens`, statik/token)
+      # zaten "Doğrulama" adımının verify reçetesinde; bu blok YALNIZ DESIGN.md kuruluysa VE
+      # kullanıcı `ui_quality: strict` seçtiyse veya UI-ağır repo tespit edildiyse eklenir.
+      # KOŞUL: DESIGN.md yoksa VEYA UI-ağır değilse bu adımı SİL — no-op değil, gereksiz.
+      # İLK BASELINE İNSAN ONAYIYLA KİLİTLENİR (dış araştırma, GPT-5.5-pro bulgusu): otomatik
+      # alınan ilk screenshot'ı sessizce baseline yapma — kötü bir ekranı "referans" olarak
+      # dondurursun. Erişilebilirlik + görsel regresyon araçları REPO STACK'İNE göre seçilir
+      # (örn. {{A11Y_KOMUTU}} = axe-core/Lighthouse CLI; {{GORSEL_REGRESYON_KOMUTU}} = Playwright
+      # screenshot + baseline diff) — bu paket araç dayatmaz, yalnız adımın YERİNİ gösterir.
+      - name: Tasarım Kademe 2-3 (erişilebilirlik + görsel regresyon — opsiyonel)
+        run: |
+          {{A11Y_KOMUTU}}                  # örn. npx @axe-core/cli {{HEDEF_URL}}
+          {{GORSEL_REGRESYON_KOMUTU}}      # örn. npx playwright test --grep @visual

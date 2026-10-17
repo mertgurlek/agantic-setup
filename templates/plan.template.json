@@ -1,0 +1,76 @@
+{
+  "schema_version": 2,
+  "_ornek": [
+    "PLAN ŞABLONU — plan-first kuralının şema-zorunlu artefaktı.",
+    "NEDEN VAR (dış denetim bulgusu): 'plan-first ZORUNLU' nesirde vardı ama plan git-tracked,",
+    "şema-zorunlu bir artefakt DEĞİLDİ — ajan plansız (ya da boş-dolgu bir planla) doğrudan",
+    "koda geçebiliyordu, hiçbir kapı bunu yakalamıyordu. 'gates/check-process-discipline.mjs",
+    "--rule=plan-exists' bu şablonu zorunlu üç alan için denetler: davranis_degisir ·",
+    "etkilenen_anchors · kapsam.",
+    "",
+    "YER: docs/plans/<dal-adi>.plan.json  (dal adı git branch'inden türer; '/' -> '-')",
+    "    ör. dal 'feature/sifre-sifirlama' ise -> docs/plans/feature-sifre-sifirlama.plan.json",
+    "SAAT: kod diff'inden ÖNCE yazılır (plan-first) — kapı staged kod diff'i gördüğünde bu",
+    "    dosyanın VAR ve şema-dolu olmasını arar.",
+    "",
+    "DÜRÜST SINIR: kapı yalnız VARLIK+ŞEMA-DOLULUK'a bakar (alan dolu mu). Planın KALİTESİ",
+    "(doğru kapsamı seçti mi, gerçekçi mi) Hakem/insan işidir (E2) — kapı bunu YARGILAYAMAZ.",
+    "'_ornek' alanı SADECE bu şablonda var — gerçek bir planda BULUNMAMALI (silinir)."
+  ],
+
+  "davranis_degisir": false,
+  "_davranis_degisir_aciklama": "bool ZORUNLU. Bu değişiklik gözlemlenebilir davranışı değiştiriyor mu? (true/false — ajanın kendi beyanı, kapı yalnız alanın DOLU/tip-doğru olduğunu denetler, beyanın DOĞRULUĞUNU denetleyemez.)",
+
+  "etkilenen_anchors": [],
+  "_etkilenen_anchors_aciklama": "dizi ZORUNLU. davranis_degisir=true ise EN AZ 1 öğe gerekir — hangi repo:symbol'ler etkileniyor. Örnek: [\"backend:AuthService#SendReset\", \"frontend:LoginForm\"]. davranis_degisir=false ise boş bırakılabilir (ama boş liste + true kombinasyonu FAIL'dir — kapı bunu yakalar).",
+
+  "kapsam": "hafif",
+  "_kapsam_aciklama": "hafif|tam ZORUNLU. hafif = tek dosya/küçük düzeltme, tam = çok-dosyalı/mimariyi etkileyen değişiklik. Hedef repoya göre bu iki değerin eşiğini insan/Hakem kalibre eder — kapı yalnız değerin bu iki sözcükten biri olduğunu denetler.",
+
+  "ozet": "<bir-iki cümle: bu değişiklik ne yapıyor, neden gerekiyor>",
+  "plan_adimlari": [
+    {
+      "goal_id": "G1",
+      "parent_goal": null,
+      "expected_outcome": "<gözlemlenebilir sonuç: hangi davranış/kanıt oluşacak>",
+      "proof_artifacts": [
+        "<test adı, dosya yolu veya ölçüm komutu>"
+      ],
+      "write_set": [
+        "<bu adımın yazacağı repo yolu veya glob>"
+      ],
+      "rol": null,
+      "agirlik": null,
+      "depends_on": []
+    }
+  ],
+  "_depends_on_aciklama": [
+    "depends_on OPSİYONELDİR (v0.21 K50) — eski planlar kırılmaz; boş/eksikse 'bağımsız' sayılır.",
+    "İÇERİK: bu adımın BEKLEMESİ gereken goal_id'ler (['G1','G2']). parent_goal HİYERARŞİdir",
+    "(hangi hedefin altında), depends_on ise SIRA'dır (hangisi önce bitmeli) — ikisi ayrı eksen.",
+    "NEDEN: 'ana ajan işleri doğru sıra ile paralel dağıtsın' talebinin makine-okunur hâli.",
+    "depends_on'u BOŞ olan adımlar birbirinden bağımsızdır → AYNI turda paralel açılabilirler.",
+    "SALT-OKUR adımlarda (keşif/tarama/denetim) bağımsızsa paralellik VARSAYILANDIR.",
+    "YAZAN adımlarda ek şart: write_set'ler KESİŞMEMELİ (bkz. CLAUDE.md bayat-bağlam tablosu) —",
+    "kesişen iki yazan adım depends_on ile SIRALANIR, paralel koşmaz.",
+    "DÜRÜST SINIR: kapı bu alanı denetlemez (opsiyonel, kalibre edilmemiş). Döngüsel bağımlılık",
+    "ya da eksik sıra bulanık invaryanttır (E2) — Hakem/insan denetler. Kalibrasyon sahada",
+    "ölçülünce bir VARLIK kapısı değerlendirilebilir; kalite kapısı asla (K31 alt.(a) emsali)."
+  ],
+  "_rol_agirlik_aciklama": [
+    "rol + agirlik OPSİYONELDİR (v0.17.2 K31) — eski planlar kırılmaz, kapı yokluklarını yok sayar.",
+    "rol: bu adımı hangi alt-ajan yürütecek ('kasif'|'uygulayici'|'hakem'|... ya da null=ana ajan).",
+    "agirlik: 'hafif'|'orta'|'agir' — çağrı-başına model/effort override'ının kaynağı.",
+    "NEDEN: rol frontmatter'ındaki model:/effort: o rolün VARSAYILANIDIR (taban), tavan değil.",
+    "Aynı rol hem tek-satırlık şablon düzeltmesi hem kapı mimarisi yazabilir; ikisine aynı ağırlığı",
+    "göndermek israftır. Claude Code'un Agent aracı çağrı başına model+effort override kabul eder.",
+    "'thinking' override'ı YOKTUR — derinlik yalnız effort ile ayarlanır (ölü-referans yasağı).",
+    "Brifteki 'Ağırlık' alanıyla AYNI eksendir: templates/brif.template.md.",
+    "DÜRÜST SINIR: kapı bu alanların DOLU olduğunu bile denetlemez (opsiyonel) — doğru rol/ağırlık",
+    "seçimi bulanık bir yargıdır (E2), Hakem/insan işidir."
+  ],
+  "planlanan_adimlar": [
+    "<adım 1>",
+    "<adım 2>"
+  ]
+}

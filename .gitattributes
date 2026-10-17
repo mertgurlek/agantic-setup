@@ -1,0 +1,39 @@
+# Dağıtım (git archive → agentic-repo-setup.skill) dışlamaları.
+# export-ignore = git archive'ın standart dışlama mekanizması. Çift biçim (dir/ + dir/**)
+# bazı git sürümlerinin çıplak-dizin alt-içeriği kaçırmasına karşı sigortadır.
+.claude/        export-ignore
+.claude/**      export-ignore
+# .hakem/ = bu reponun KENDİ dalga-verdict kanıtları (repo-içi süreç artefaktı) — pakete girmez.
+.hakem/         export-ignore
+.hakem/**       export-ignore
+dist/           export-ignore
+public/         export-ignore
+public/**       export-ignore
+*.skill         export-ignore
+*.zip           export-ignore
+# Pilot proje + simülasyon alanları — jenerik skill paketine GİRMEZ (kimliği kurulum süreci).
+# (Üç-alan reorg 2026-07-22: eski-pilot-dizinleri/ → pilot-proje/ + pilot-sim/)
+pilot-proje/   export-ignore
+pilot-proje/** export-ignore
+pilot-sim/     export-ignore
+pilot-sim/**   export-ignore
+# bench/ = rol promptlarının model-uyum ölçümü (iç araç: vaka seti + fixture + koşu çıktıları).
+# Skill'in KENDİ rollerini sertleştirmek için kullanılır; paketlenen üründe yeri yok — pakete
+# girmesi SKILL.md kimliğini genişletir (süpervizör kararı, v1'de ALINMADI).
+bench/           export-ignore
+bench/**         export-ignore
+# rol-bench üçlüsü BİRLİKTE dışlanır: script `bench/vakalar.json`'u okur, test de öyle. Script
+# pakete girip vaka seti girmeseydi ÖLÜ REFERANS olurdu (paketin savaştığı hatanın ta kendisi);
+# test girip vaka seti girmeseydi hedef repoda `node --test` KIRILIRDI.
+scripts/rol-bench.mjs    export-ignore
+tests/rol-bench.test.mjs export-ignore
+*.xlsx          export-ignore
+*.csv           export-ignore
+.openrouter-usage.jsonl export-ignore
+
+# Kabuk betikleri (hook başlatıcısı şablonu dahil) her platformda LF kalır — CRLF shebang satırını bozar.
+*.sh text eol=lf
+
+# v0.30.1: kullanıcı-kapsamı skill kurulumu (release son adımı) — yalnız BU repoda; script + testi BİRLİKTE dışlanır
+scripts/install-local.mjs    export-ignore
+tests/install-local.test.mjs export-ignore

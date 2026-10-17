@@ -1,0 +1,92 @@
+# Bu şablon SKILL kurulum tarifinde KURULMAZ — hedef repoda chatbot/IR derleme scriptini yazan
+# ekip (Proje B / RAG entegrasyonu) tarafından elle kullanılır (v0.18.3 karar — bkz.
+# reference/faz3-bilgi-katmani.md madde 3c gerekçesi: bu paket docs/registry.yaml + docs/user/
+# üretimini kurar, ama bir IR-derleme runtime'ı KURMAZ — "runtime motoru değiliz" sınırının bu
+# şablon için somut hali).
+# ==============================================================================
+# IR (ARA TEMSİL) ARTIFACT MANIFEST ŞABLONU (Katman A — genel, repo-özgü değil)
+#
+# NE İŞE YARAR: [L0] son-kullanıcı dokümanları doğrudan tüketilmez. Bir IR'ye (ara temsil)
+# DERLENİR; IR'den yüzeyler beslenir: chatbot (RAG) · ekran · PDF · destek-intake ajanı.
+# Bu manifest, o derleme çıktısının KONTRATIDIR — "hangi [L0]'lar, hangi sürümde, hangi
+# yüzeylere, hangi çözülmüş değerlerle derlendi" sorusunu cevaplar.
+#
+# NEDEN AYRI ARTEFAKT (Ş8 teslim yüzeyi): chatbot ekibi (Proje B) [L0] markdown'larını
+# DEĞİL, bu IR'yi tüketir. Manifest teslim sözleşmesidir: chatbot "hangi sürümü aldım,
+# neyi arayabilirim, ne zaman susmalıyım"ı buradan bilir. IR'nin KENDİSİ (chunk'lanmış
+# içerik + embedding) Proje B'nin işidir; bu manifest onun GİRDİ KONTRATIDIR.
+#
+# ⭐ KANONİK YÖN: markdown [L0] KAYNAK, IR TÜREV. IR elle yazılmaz — [L0]'lardan DERLENİR.
+# IR ile [L0] çelişirse [L0] kazanır (tek-yön ayna). Bu manifest her derlemede YENİDEN üretilir.
+#
+# ÜRETİM TALİMATI: Bu FORMAT'tır. [toggle: son-kullanıcı doküman + IR derleme] AÇIKSA kurulur.
+# Chatbot/IR yüzeyi olmayan repoda bu dosya HİÇ kurulmaz ("kullanmayan ödemez").
+# ==============================================================================
+
+ir_manifest_version: 1                # şema sürümü (geriye-uyumsuz değişim artırır)
+compiled_at: {{TARIH}}                # derleme zamanı — bayatlama tarihi
+source_commit: {{SHA}}                # hangi commit'teki [L0]'lardan derlendi (provenance)
+registry_ref: docs/registry.yaml      # feature_id JOIN kaynağı (registry kuruluysa)
+
+# --- GLOBAL SÖZLÜK: render-anında çözülen makrolar ({{support.email}} gibi) ----
+# ⚠️ [L0] gövdesindeki makrolar BURADA çözülür — TEK KAYNAK, sıfır kopya (site-config'ten).
+site_config_ref: docs/site-config.yaml   # global sözlük kaynağı (templates/site-config.template.yaml)
+
+# --- DERLENEN MAKALELER: her [L0] → IR girdisi -------------------------------
+# ⚠️ Yalnız coverage.status: tam VE verification.status: dogrulandi olan [L0]'lar derlenir.
+#    Eksik/doğrulanmamış makale IR'ye GİRMEZ (üretim-zamanı halüsinasyon panzehiri).
+articles: []
+  # örn:
+  # - feature_id: siparis-limiti     # registry anahtarı (KANONİK)
+  #   source: docs/user/siparis-limiti.md
+  #   doc_version: "1.2"                 # [L0] içerik sürümü
+  #   status: dogrulandi                 # [L0].verification.status — dogrulandi DEĞİLSE derlenmez
+  #   yayin: yayinlandi                  # [L0].yayin_durumu — taslak/inceleme ise IR'ye girmez
+  #
+  #   # --- YÜZEY YÖNLENDİRME (Ş8 surface_routing'in derlenmiş hali) ---
+  #   panel: [yuzey-yeni, yuzey-eski]    # [L0].applies.panel — hangi yüzey(ler)e ait
+  #   coverage: both_different           # [L0].applies.coverage — YÖNLENDİRME kuralının girdisi:
+  #                                      #   both_same      → her panele döner
+  #                                      #   both_different → yalnız KENDİ paneline (yanlış-panel adımı riski)
+  #   availability: feature_gated        # [L0].applies.availability — erişim filtresi
+  #
+  #   # --- RETRIEVAL (chatbot arama hammaddesi — [L0].retrieval'dan) ---
+  #   aliases: [...]                     # cevap-sınırlı sorgular (konu-komşu DEĞİL)
+  #   negative_queries: [...]            # "bu makale şunu KAPSAMAZ" → abstain tetiği
+  #   answerability: yes                 # niyeti tam karşılıyor mu
+  #
+  #   # --- 🔴 ROSETTA (P17 — feature_id'nin kod-biçimleri; registry.rosetta'dan TÜRETİLİR) ---
+  #   rosetta: {enum_name: PolicyChecker, code: 18}   # chatbot'un enabled_features filtresi bunu kullanır
+  #                                      # ⚠️ Ş7 server_authoritative.enabled_features NUMERİK/enum gelir;
+  #                                      #   chatbot'un elindeki slug'ı buna çevirmeden filtre çalışmaz.
+  #
+  #   # --- PROVENANCE (chatbot atıf verebilsin) ---
+  #   tech_docs: [docs/tech/policy/warning-levels.md]   # registry'den TÜRETİLİR (besleyen [T]'ler)
+  #   feeds_verified: true               # besleyen TÜM [T]'ler dogrulandi mı (coverage gate sonucu)
+
+# --- ABSTAIN KURALLARI (Ş8'in IR'ye derlenmiş hali — chatbot NE ZAMAN susar) --
+# ⚠️ Bu, chatbot'un (Proje B) uygulayacağı sözleşmedir. IR bunu TAŞIR, uygulamaz.
+abstain_contract:
+  triggers: [chunk-yok, bayat-kapsam, dusuk-guven, canli-veri-sorusu]
+  reason_enum: [not_documented, not_verified, coverage_stale, out_of_scope]
+  # ⭐ ASİMETRİ: yanlış cevap "bilmiyorum"dan tehlikelidir. Emin değilse SUS + related'a yönlendir.
+  # --- 🔴 EVIDENCE_HOOK (Ş8 — abstain'i DENETLENEBİLİR kılar) ---
+  # ⚠️ Bu olmadan chatbot'un DOĞRU sebeple mi sustuğu (yoksa yanlış chunk'ı mı kaçırdığı)
+  #    denetlenemez. Her cevap bu izi üretmeli — Faz 2 çıkış kapısı buna bağlı (plan §2.4).
+  evidence_hook: "her cevap → {uygulanan-filtreler, seçilen-chunk-id'leri, abstain-reason|null}"
+
+# --- INVALIDATION (IR ne zaman geçersizleşir — Ş8 invalidation'dan) ----------
+invalidation:
+  on_doc_republish: "atomik takas — yeni indekslen SONRA eski sil"
+  on_feature_off: "o tenant'ın chunk'ları filtrele"
+  on_panel_retired: "o panelin chunk'ları ARŞİVE (silme değil)"
+
+# ------------------------------------------------------------------------------
+# DOLDURMA KURALLARI:
+# 1. Bu manifest ELLE YAZILMAZ — bir derleme scripti [L0]'ları tarayıp üretir. Şablon
+#    çıktının ŞEKLİNİ sabitler; script'i FAZ 2'de (chatbot handshake) kur.
+# 2. articles listesine yalnız coverage: tam + status: dogrulandi + yayin: yayinlandi olan
+#    [L0]'lar girer. Üçünden biri eksikse makale IR'ye GİRMEZ (dürüst boşluk > yanlış cevap).
+# 3. panel/coverage/availability [L0].applies'tan BİREBİR taşınır (üç eksen — bkz. L0 şablonu).
+# 4. Bu manifest Proje B'ye (chatbot) teslim edilir — Ş8 kontratının somut çıktısıdır.
+# ------------------------------------------------------------------------------
