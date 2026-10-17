@@ -31,8 +31,8 @@ Güncelleme (yeni sürüm çıktığında):
 
 Bu paket **commit-SHA sürümleme** kullanır (`.claude-plugin/plugin.json`'da `version` alanı bilinçle
 YOKTUR) → depoya her push, güncelleme olarak akar; ayrı sürüm bump'ı beklemeden en güncel hâli alırsın.
-`public/*.skill` bundle'ları ve SemVer etiketi (D-A boru hattı) **durmaya devam eder** — onlar
-Claude.ai app'i ve arşiv/sabit-sürüm ihtiyacı içindir.
+Sürümlü `.skill`/`.zip` bundle'ları **GitHub Releases** sayfasında durur — onlar Claude.ai app'i ve
+sabit-sürüm ihtiyacı içindir: https://github.com/mertgurlek/agantic-setup/releases
 
 Ekipçe otomatik yüklemek için (`.claude/settings.json`):
 ```json
@@ -44,28 +44,13 @@ Ekipçe otomatik yüklemek için (`.claude/settings.json`):
 }
 ```
 
-### Erişim — bu PRIVATE bir marketplace'tir
+### Erişim
 
-Plugin sisteminin kendi izin katmanı **yoktur**; erişim tamamen **GitHub deposunun izinlerine** dayanır.
-Depo `private` olduğu sürece marketplace'i yalnız depoya erişimi olanlar ekleyebilir/kurabilir.
+Depo **public**'tir: marketplace'i herkes ekleyip kurabilir, ayrı bir yetki ya da token gerekmez.
+Ana depoya değişiklik ise yalnızca pull request ile girer (`CONTRIBUTING.md`).
 
-| İşlem | Nasıl |
-|---|---|
-| **Erişim ver** | GitHub → depo → Settings → Collaborators → kişiyi ekle (okuma yetkisi yeter) |
-| **Erişimi al** | Aynı ekrandan collaborator'ı çıkar → sonraki `/plugin marketplace update` başarısız olur |
-| **Kim kurabilir** | Yalnız collaborator'lar. Erişimi olmayanda `/plugin marketplace add` **hata verir** — sızıntı olmaz |
-
-Kuran kişi kendi git kimliğiyle (SSH anahtarı veya `gh auth`) doğrulanır; ayrı bir token dağıtman gerekmez.
-Arka plan otomatik güncellemesi kimlik isteyen depolarda sessizce atlanabilir — o durumda
-`/plugin marketplace update` elle koşulur.
-
-> ⚠ **Depoyu public yaparsan** marketplace de herkese açılır (ad zaten bu dosyada yazılı).
-> Erişimi daraltmak isteyen tek gerçek kaldıraç depo görünürlüğü + collaborator listesidir.
-> `public/*.skill` bundle'ını birine dosya olarak verirsen, o kopya **depo erişiminden bağımsız** çalışır
-> (ama güncellenmez) — dağıtırken bunu hesaba kat.
-
-**0) Claude.ai / masaüstü app:** Settings → Capabilities → Skills → **Upload skill** → `.skill` dosyasını
-seç. Yüklenince "repoyu çok-ajanlı geliştirmeye hazırla" / "set up agentic repo" gibi isteklerde otomatik tetiklenir.
+**0) Claude.ai / masaüstü app:** Releases sayfasından `.skill` dosyasını indir → Settings → Capabilities →
+Skills → **Upload skill** → dosyayı seç. Yüklenince "repoyu çok-ajanlı geliştirmeye hazırla" / "set up agentic repo" gibi isteklerde otomatik tetiklenir.
 
 **1) git clone (Claude Code, birincil/çapraz-platform):**
 ```bash
@@ -119,12 +104,11 @@ Bu **olgun bir betadır** — kutudan kusursuz çıkmaz, ilk gerçek repoda kali
 ## Paketi yeniden üretme (bakımcı için)
 
 ```
-npm run release    # tek dokunuş: pack:skill (temiz ağaç + öz-doğrulama + testleri koşar) + health --strict
+npm run release    # pack:skill (temiz ağaç + öz-doğrulama + testleri koşar) + sağlık taraması
 ```
-`public/` altına sürümlü adla **iki dosya** üretir: `.skill` (app) + `.zip` (elle). Bunlar paylaşıma
-hazır **release** dosyalarıdır → `public/` COMMIT'lenir (paylaşılan repoda hazır durur). Pakete
-girmeyen alanların tek kaynağı `.gitattributes`teki `export-ignore` listesidir (pilot vakası,
-ikincil skill, `public/`in kendisi dahil) — bundle kendini içermez.
+`public/` altına sürümlü adla **iki dosya** üretir: `.skill` (app) + `.zip` (elle). Bunlar commit'lenmez;
+GitHub Releases'a eklenir (`gh release create v<sürüm> public/*.skill public/*.zip`). Pakete
+girmeyen alanların tek kaynağı `.gitattributes`teki `export-ignore` listesidir — bundle kendini içermez.
 
 ## Güncelleme
 
